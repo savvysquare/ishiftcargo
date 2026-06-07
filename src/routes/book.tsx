@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import { ArrowLeft, ArrowRight, Check, Phone } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, Phone, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { Toaster } from "@/components/ui/sonner";
 import { saveBooking } from "@/lib/bookingStore";
@@ -86,6 +86,7 @@ function BookPage() {
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [done, setDone] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
   const services = SERVICE_OPTIONS[direction];
   const est = useMemo(() => estimate(direction, service, weight, boxes), [direction, service, weight, boxes]);
@@ -93,28 +94,36 @@ function BookPage() {
   const next = () => setStep((s) => Math.min(4, s + 1));
   const prev = () => setStep((s) => Math.max(1, s - 1));
 
-  const submit = (e: React.FormEvent) => {
+  const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name || !email || !phone) {
       toast.error("Please fill in your contact details.");
       return;
     }
-    saveBooking({
-      name,
-      email,
-      phone,
-      direction,
-      service,
-      weight,
-      boxes,
-      type,
-      notes,
-      location,
-      date,
-      estimate: est?.value ?? "",
-    });
-    setDone(true);
-    toast.success("Request received — we'll be in touch within one business day.");
+    setSubmitting(true);
+    try {
+      await saveBooking({
+        name,
+        email,
+        phone,
+        direction,
+        service,
+        weight,
+        boxes,
+        type,
+        notes,
+        location,
+        preferred_date: date,
+        estimate: est?.value ?? "",
+      });
+      setDone(true);
+      toast.success("Request received — we'll be in touch within one business day.");
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to submit. Please try again or call us directly.");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   if (done) {
@@ -281,8 +290,16 @@ function BookPage() {
                   Continue <ArrowRight className="h-4 w-4" />
                 </button>
               ) : (
-                <button type="submit" className="inline-flex items-center gap-2 rounded-full bg-[var(--navy)] px-6 py-3 text-sm font-semibold text-white shadow-soft hover:bg-[var(--navy-soft)]">
-                  Submit request <Check className="h-4 w-4" />
+                <button
+                  type="submit"
+                  disabled={submitting}
+                  className="inline-flex items-center gap-2 rounded-full bg-[var(--navy)] px-6 py-3 text-sm font-semibold text-white shadow-soft hover:bg-[var(--navy-soft)] disabled:opacity-60"
+                >
+                  {submitting ? (
+                    <><Loader2 className="h-4 w-4 animate-spin" /> Submitting…</>
+                  ) : (
+                    <>Submit request <Check className="h-4 w-4" /></>
+                  )}
                 </button>
               )}
             </div>

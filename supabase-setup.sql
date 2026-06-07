@@ -1,0 +1,37 @@
+-- Run this SQL in your Supabase Dashboard → SQL Editor
+-- Project: iShiftCargo Bookings
+
+create table if not exists public.bookings (
+  id             uuid primary key default gen_random_uuid(),
+  submitted_at   timestamptz not null default now(),
+  name           text not null,
+  email          text not null,
+  phone          text not null,
+  direction      text not null,
+  service        text not null,
+  weight         text,
+  boxes          text,
+  type           text,
+  notes          text,
+  location       text,
+  preferred_date text,
+  estimate       text
+);
+
+-- Enable Row Level Security
+alter table public.bookings enable row level security;
+
+-- Allow anonymous inserts (public booking form)
+create policy "allow_insert"
+  on public.bookings for insert
+  to anon with check (true);
+
+-- Allow anonymous selects (admin page has its own password gate)
+create policy "allow_select"
+  on public.bookings for select
+  to anon using (true);
+
+-- Allow anonymous deletes (guarded by password in the admin UI)
+create policy "allow_delete"
+  on public.bookings for delete
+  to anon using (true);

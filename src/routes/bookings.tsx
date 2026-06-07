@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
   Lock,
   LogOut,
@@ -16,8 +16,11 @@ import {
   Eye,
   EyeOff,
   RefreshCw,
+  Loader2,
+  AlertCircle,
 } from "lucide-react";
 import { getBookings, deleteBooking, type Booking } from "@/lib/bookingStore";
+import { isSupabaseConfigured as checkSupabase } from "@/lib/supabase";
 
 export const Route = createFileRoute("/bookings")({
   component: BookingsPage,
@@ -31,13 +34,31 @@ function BookingsPage() {
   const [pw, setPw] = useState("");
   const [showPw, setShowPw] = useState(false);
   const [error, setError] = useState("");
+
   const [bookings, setBookings] = useState<Booking[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
+
   const [selected, setSelected] = useState<Booking | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState(false);
+
+  const load = useCallback(async () => {
+    setLoading(true);
+    setLoadError(null);
+    try {
+      const data = await getBookings();
+      setBookings(data);
+    } catch (e) {
+      setLoadError(e instanceof Error ? e.message : "Failed to load bookings.");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
-    if (authed) setBookings(getBookings());
-  }, [authed]);
+    if (authed) load();
+  }, [authed, load]);
 
   const login = (e: React.FormEvent) => {
     e.preventDefault();
@@ -57,20 +78,25 @@ function BookingsPage() {
     setSelected(null);
   };
 
-  const refresh = () => setBookings(getBookings());
-
-  const confirmDelete = (id: string) => {
-    deleteBooking(id);
-    setBookings(getBookings());
-    if (selected?.id === id) setSelected(null);
-    setDeleteId(null);
+  const confirmDelete = async (id: string) => {
+    setDeleting(true);
+    try {
+      await deleteBooking(id);
+      setBookings((prev) => prev.filter((b) => b.id !== id));
+      if (selected?.id === id) setSelected(null);
+    } catch (e) {
+      setLoadError(e instanceof Error ? e.message : "Delete failed.");
+    } finally {
+      setDeleting(false);
+      setDeleteId(null);
+    }
   };
 
+  /* ── Login screen ─────────────────────────────────────────────────────── */
   if (!authed) {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center bg-[var(--surface)] px-4">
         <div className="w-full max-w-sm">
-          {/* Logo / brand */}
           <div className="mb-8 text-center">
             <div className="mx-auto mb-4 grid h-14 w-14 place-items-center rounded-2xl bg-[var(--navy)] text-white shadow-lift">
               <Lock className="h-6 w-6" />
@@ -105,7 +131,7 @@ function BookingsPage() {
             </label>
 
             {error && (
-              <p className="mt-3 rounded-xl bg-red-50 px-4 py-2.5 text-xs font-medium text-red-600 dark:bg-red-950/30 dark:text-red-400">
+              <p className="mt-3 rounded-xl bg-red-50 px-4 py-2.5 text-xs font-medium text-red-600">
                 {error}
               </p>
             )}
@@ -122,23 +148,35 @@ function BookingsPage() {
     );
   }
 
+  /* ── Dashboard ────────────────────────────────────────────────────────── */
   return (
     <div className="min-h-screen bg-[var(--surface)]">
       {/* Header */}
       <header className="sticky top-0 z-30 border-b border-border bg-card/80 backdrop-blur">
         <div className="container-x flex h-16 items-center justify-between">
-          <div>
+          <div className="flex items-center gap-3">
             <span className="text-base font-bold text-[var(--navy)]">Bookings Dashboard</span>
-            <span className="ml-3 rounded-full bg-[var(--teal-soft)] px-2.5 py-0.5 text-xs font-semibold text-[var(--teal)]">
+            <span className="rounded-full bg-[var(--teal-soft)] px-2.5 py-0.5 text-xs font-semibold text-[var(--teal)]">
               {bookings.length} total
             </span>
+            {checkSupabase ? (
+              <span className="rounded-full bg-emerald-50 px-2.5 py-0.5 text-xs font-semibold text-emerald-600">
+                ● Supabase
+              </span>
+            ) : (
+              <span className="rounded-full bg-amber-50 px-2.5 py-0.5 text-xs font-semibold text-amber-600">
+                ● Local storage
+              </span>
+            )}
           </div>
           <div className="flex items-center gap-3">
             <button
-              onClick={refresh}
-              className="flex items-center gap-1.5 rounded-full border border-border bg-background px-4 py-2 text-xs font-semibold text-[var(--navy)] hover:bg-secondary"
+              onClick={load}
+              disabled={loading}
+              className="flex items-center gap-1.5 rounded-full border border-border bg-background px-4 py-2 text-xs font-semibold text-[var(--navy)] hover:bg-secondary disabled:opacity-50"
             >
-              <RefreshCw className="h-3.5 w-3.5" /> Refresh
+              {loading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <RefreshCw className="h-3.5 w-3.5" />}
+              Refresh
             </button>
             <button
               onClick={logout}
@@ -151,18 +189,41 @@ function BookingsPage() {
       </header>
 
       <div className="container-x py-8">
-        {bookings.length === 0 ? (
-          /* Empty state */
+        {/* Error banner */}
+        {loadError && (
+          <div className="mb-6 flex items-center gap-3 rounded-2xl border border-red-200 bg-red-50 px-5 py-4 text-sm text-red-700">
+            <AlertCircle className="h-4 w-4 shrink-0" />
+            <span>{loadError}</span>
+            <button onClick={() => setLoadError(null)} className="ml-auto text-xs underline">Dismiss</button>
+          </div>
+        )}
+
+        {/* Loading skeleton */}
+        {loading && bookings.length === 0 && (
+          <div className="space-y-3">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="h-24 animate-pulse rounded-2xl bg-card border border-border" />
+            ))}
+          </div>
+        )}
+
+        {/* Empty state */}
+        {!loading && bookings.length === 0 && !loadError && (
           <div className="flex flex-col items-center justify-center rounded-3xl border border-dashed border-border bg-card py-24 text-center">
             <div className="grid h-16 w-16 place-items-center rounded-2xl bg-[var(--surface-2)] text-muted-foreground">
               <Package className="h-8 w-8" />
             </div>
             <h2 className="mt-5 text-lg font-semibold text-[var(--navy)]">No bookings yet</h2>
             <p className="mt-2 max-w-xs text-sm text-muted-foreground">
-              Bookings submitted through the <a href="/book" className="text-[var(--teal)] underline underline-offset-2">Book a Shipment</a> form will appear here.
+              Bookings submitted through the{" "}
+              <a href="/book" className="text-[var(--teal)] underline underline-offset-2">Book a Shipment</a>{" "}
+              form will appear here.
             </p>
           </div>
-        ) : (
+        )}
+
+        {/* Bookings list + detail */}
+        {bookings.length > 0 && (
           <div className="grid gap-6 lg:grid-cols-[1fr_400px]">
             {/* List */}
             <div className="space-y-3">
@@ -170,7 +231,9 @@ function BookingsPage() {
                 <div
                   key={b.id}
                   onClick={() => setSelected(b)}
-                  className={`group relative cursor-pointer rounded-2xl border bg-card p-5 shadow-soft transition-all hover:-translate-y-0.5 hover:shadow-lift ${selected?.id === b.id ? "border-[var(--teal)] ring-2 ring-[var(--teal)]/20" : "border-border"}`}
+                  className={`group relative cursor-pointer rounded-2xl border bg-card p-5 shadow-soft transition-all hover:-translate-y-0.5 hover:shadow-lift ${
+                    selected?.id === b.id ? "border-[var(--teal)] ring-2 ring-[var(--teal)]/20" : "border-border"
+                  }`}
                 >
                   <div className="flex items-start justify-between gap-4">
                     <div className="min-w-0 flex-1">
@@ -185,11 +248,11 @@ function BookingsPage() {
                         {b.estimate && <span className="flex items-center gap-1"><DollarSign className="h-3 w-3" />{b.estimate}</span>}
                       </div>
                     </div>
-                    <div className="flex flex-col items-end gap-2 text-right">
-                      <time className="text-xs text-muted-foreground">{formatDate(b.submittedAt)}</time>
+                    <div className="flex flex-col items-end gap-2">
+                      <time className="text-xs text-muted-foreground">{formatDate(b.submitted_at)}</time>
                       <button
                         onClick={(e) => { e.stopPropagation(); setDeleteId(b.id); }}
-                        className="opacity-0 group-hover:opacity-100 rounded-full p-1.5 text-red-400 transition-all hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-950/30"
+                        className="opacity-0 group-hover:opacity-100 rounded-full p-1.5 text-red-400 transition-all hover:bg-red-50 hover:text-red-600"
                       >
                         <Trash2 className="h-3.5 w-3.5" />
                       </button>
@@ -207,12 +270,11 @@ function BookingsPage() {
                     <h2 className="text-base font-bold text-[var(--navy)]">Booking detail</h2>
                     <button
                       onClick={() => setDeleteId(selected.id)}
-                      className="flex items-center gap-1.5 rounded-full border border-red-200 px-3 py-1.5 text-xs font-semibold text-red-500 hover:bg-red-50 dark:border-red-800 dark:hover:bg-red-950/30"
+                      className="flex items-center gap-1.5 rounded-full border border-red-200 px-3 py-1.5 text-xs font-semibold text-red-500 hover:bg-red-50"
                     >
                       <Trash2 className="h-3.5 w-3.5" /> Delete
                     </button>
                   </div>
-
                   <div className="space-y-4">
                     <DetailRow icon={<User />} label="Name" value={selected.name} />
                     <DetailRow icon={<Mail />} label="Email" value={selected.email} />
@@ -222,15 +284,15 @@ function BookingsPage() {
                     <DetailRow icon={<Package />} label="Service" value={friendlyService(selected.service)} />
                     {selected.weight && <DetailRow icon={<Package />} label="Weight" value={`${selected.weight} kg`} />}
                     {selected.boxes && selected.boxes !== "1" && <DetailRow icon={<Package />} label="Boxes" value={selected.boxes} />}
-                    <DetailRow icon={<FileText />} label="Contents type" value={selected.type} />
+                    {selected.type && <DetailRow icon={<FileText />} label="Contents type" value={selected.type} />}
                     {selected.notes && <DetailRow icon={<FileText />} label="Notes" value={selected.notes} />}
                     <hr className="border-border" />
-                    <DetailRow icon={<MapPin />} label="Location" value={selected.location} />
-                    {selected.date && <DetailRow icon={<Calendar />} label="Preferred date" value={selected.date} />}
+                    {selected.location && <DetailRow icon={<MapPin />} label="Location" value={selected.location} />}
+                    {selected.preferred_date && <DetailRow icon={<Calendar />} label="Preferred date" value={selected.preferred_date} />}
                     {selected.estimate && <DetailRow icon={<DollarSign />} label="Estimate" value={selected.estimate} highlight />}
                     <hr className="border-border" />
                     <p className="text-xs text-muted-foreground">
-                      Submitted {new Date(selected.submittedAt).toLocaleString()}
+                      Submitted {new Date(selected.submitted_at).toLocaleString()}
                     </p>
                   </div>
                 </div>
@@ -249,23 +311,27 @@ function BookingsPage() {
       {deleteId && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm px-4">
           <div className="w-full max-w-sm rounded-3xl bg-card p-8 shadow-lift">
-            <div className="mb-2 grid h-12 w-12 place-items-center rounded-2xl bg-red-100 text-red-500 dark:bg-red-950/40">
+            <div className="mb-2 grid h-12 w-12 place-items-center rounded-2xl bg-red-100 text-red-500">
               <Trash2 className="h-5 w-5" />
             </div>
             <h3 className="mt-4 text-base font-bold text-[var(--navy)]">Delete booking?</h3>
-            <p className="mt-2 text-sm text-muted-foreground">This action cannot be undone. The booking will be permanently removed from local storage.</p>
+            <p className="mt-2 text-sm text-muted-foreground">
+              This action cannot be undone. The booking will be permanently removed{checkSupabase ? " from Supabase" : " from local storage"}.
+            </p>
             <div className="mt-6 flex gap-3">
               <button
                 onClick={() => setDeleteId(null)}
-                className="flex-1 rounded-full border border-border py-2.5 text-sm font-semibold text-[var(--navy)] hover:bg-secondary"
+                disabled={deleting}
+                className="flex-1 rounded-full border border-border py-2.5 text-sm font-semibold text-[var(--navy)] hover:bg-secondary disabled:opacity-50"
               >
                 Cancel
               </button>
               <button
                 onClick={() => confirmDelete(deleteId)}
-                className="flex-1 rounded-full bg-red-500 py-2.5 text-sm font-semibold text-white hover:bg-red-600"
+                disabled={deleting}
+                className="flex flex-1 items-center justify-center gap-2 rounded-full bg-red-500 py-2.5 text-sm font-semibold text-white hover:bg-red-600 disabled:opacity-60"
               >
-                Delete
+                {deleting ? <Loader2 className="h-4 w-4 animate-spin" /> : "Delete"}
               </button>
             </div>
           </div>
@@ -275,7 +341,7 @@ function BookingsPage() {
   );
 }
 
-/* ─── Small helpers ─────────────────────────────────────────────────────── */
+/* ─── Helpers ───────────────────────────────────────────────────────────── */
 
 function Badge({ label, teal }: { label: string; teal?: boolean }) {
   return (
@@ -291,7 +357,7 @@ function DetailRow({ icon, label, value, highlight }: { icon: React.ReactNode; l
       <span className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground [&>svg]:h-4 [&>svg]:w-4">{icon}</span>
       <div className="min-w-0">
         <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">{label}</p>
-        <p className={`mt-0.5 text-sm break-words ${highlight ? "font-bold text-[var(--teal)]" : "text-[var(--navy)]"}`}>{value}</p>
+        <p className={`mt-0.5 break-words text-sm ${highlight ? "font-bold text-[var(--teal)]" : "text-[var(--navy)]"}`}>{value}</p>
       </div>
     </div>
   );
