@@ -16,13 +16,12 @@ export function Navbar() {
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/60 bg-background/85 backdrop-blur-xl">
       <div className="container-x flex h-18 items-center justify-between py-4">
-        <Link to="/" className="group flex items-center gap-2">
-          <span className="grid h-9 w-9 place-items-center rounded-xl bg-[var(--navy)] text-white shadow-soft">
-            <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5">
-              <path d="M3 12h14l-3-3m3 3l-3 3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-              <circle cx="20" cy="12" r="1.5" fill="currentColor" />
-            </svg>
-          </span>
+        <Link to="/" className="group flex items-center gap-2.5">
+          <img
+            src="/logo.png"
+            alt="iShiftCargo logo"
+            className="h-9 w-9 rounded-xl object-cover shadow-soft transition-transform group-hover:scale-105"
+          />
           <span className="text-lg font-semibold tracking-tight text-[var(--navy)]">
             iShift<span className="text-[var(--teal)]">Cargo</span>
           </span>
