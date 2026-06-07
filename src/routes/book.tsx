@@ -3,6 +3,7 @@ import { useMemo, useState } from "react";
 import { ArrowLeft, ArrowRight, Check, Phone } from "lucide-react";
 import { toast } from "sonner";
 import { Toaster } from "@/components/ui/sonner";
+import { saveBooking } from "@/lib/bookingStore";
 
 export const Route = createFileRoute("/book")({
   head: () => ({
@@ -98,6 +99,20 @@ function BookPage() {
       toast.error("Please fill in your contact details.");
       return;
     }
+    saveBooking({
+      name,
+      email,
+      phone,
+      direction,
+      service,
+      weight,
+      boxes,
+      type,
+      notes,
+      location,
+      date,
+      estimate: est?.value ?? "",
+    });
     setDone(true);
     toast.success("Request received — we'll be in touch within one business day.");
   };
