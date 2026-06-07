@@ -4,12 +4,9 @@ import {
   Link,
   createRootRouteWithContext,
   useRouter,
-  HeadContent,
-  Scripts,
 } from "@tanstack/react-router";
-import { useEffect, type ReactNode } from "react";
+import { useEffect } from "react";
 
-import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { Navbar } from "@/components/site/Navbar";
 import { Footer } from "@/components/site/Footer";
@@ -56,7 +53,10 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
           >
             Try again
           </button>
-          <a href="/" className="inline-flex items-center justify-center rounded-full border border-border bg-background px-5 py-2.5 text-sm font-medium text-foreground hover:bg-secondary">
+          <a
+            href="/"
+            className="inline-flex items-center justify-center rounded-full border border-border bg-background px-5 py-2.5 text-sm font-medium text-foreground hover:bg-secondary"
+          >
             Go home
           </a>
         </div>
@@ -66,49 +66,10 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
 }
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
-  head: () => ({
-    meta: [
-      { charSet: "utf-8" },
-      { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "iShiftCargo | Premium Cargo Shipping | Lagos ↔ Western Canada" },
-      { name: "description", content: "Reliable air, sea and vehicle cargo shipping between Lagos, Nigeria and Calgary, Alberta. Transparent pricing, no hidden clearance fees, weekly departures." },
-      { name: "author", content: "iShiftCargo" },
-      { property: "og:title", content: "iShiftCargo | Premium Cargo Shipping | Lagos ↔ Western Canada" },
-      { property: "og:description", content: "Reliable air, sea and vehicle cargo shipping between Lagos, Nigeria and Calgary, Alberta. Transparent pricing, no hidden clearance fees, weekly departures." },
-      { property: "og:type", content: "website" },
-      { property: "og:site_name", content: "iShiftCargo" },
-      { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:title", content: "iShiftCargo | Premium Cargo Shipping | Lagos ↔ Western Canada" },
-      { name: "twitter:description", content: "Reliable air, sea and vehicle cargo shipping between Lagos, Nigeria and Calgary, Alberta. Transparent pricing, no hidden clearance fees, weekly departures." },
-      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/88b6b3df-908f-4aee-abe3-746f3a2140e1/id-preview-889be48b--40e2ac48-22e5-4658-af71-1a5bd0c98561.lovable.app-1780836457073.png" },
-      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/88b6b3df-908f-4aee-abe3-746f3a2140e1/id-preview-889be48b--40e2ac48-22e5-4658-af71-1a5bd0c98561.lovable.app-1780836457073.png" },
-    ],
-    links: [
-      { rel: "stylesheet", href: appCss },
-      { rel: "preconnect", href: "https://fonts.googleapis.com" },
-      { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
-      { rel: "stylesheet", href: "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" },
-    ],
-  }),
-  shellComponent: RootShell,
   component: RootComponent,
   notFoundComponent: NotFoundComponent,
   errorComponent: ErrorComponent,
 });
-
-function RootShell({ children }: { children: ReactNode }) {
-  return (
-    <html lang="en">
-      <head>
-        <HeadContent />
-      </head>
-      <body>
-        {children}
-        <Scripts />
-      </body>
-    </html>
-  );
-}
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
