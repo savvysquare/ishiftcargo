@@ -120,7 +120,8 @@ function BookPage() {
       toast.success("Request received — we'll be in touch within one business day.");
     } catch (err) {
       console.error(err);
-      toast.error("Failed to submit. Please try again or call us directly.");
+      const errorMessage = err instanceof Error ? err.message : String(err);
+      toast.error(`Failed to submit: ${errorMessage}. Please try again or call us directly.`);
     } finally {
       setSubmitting(false);
     }
