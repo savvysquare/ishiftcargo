@@ -1,5 +1,6 @@
 -- Run this SQL in your Supabase Dashboard → SQL Editor
 -- Project: iShiftCargo Bookings
+-- This script is safe to run multiple times (idempotent)
 
 create table if not exists public.bookings (
   id             uuid primary key default gen_random_uuid(),
@@ -21,45 +22,44 @@ create table if not exists public.bookings (
 -- Enable Row Level Security
 alter table public.bookings enable row level security;
 
--- Allow anonymous inserts (public booking form)
+-- Add extended columns (safe to run again)
+alter table public.bookings
+  add column if not exists sender_address   text,
+  add column if not exists receiver_name    text,
+  add column if not exists receiver_address text,
+  add column if not exists receiver_email   text,
+  add column if not exists receiver_phone   text,
+  add column if not exists electronics      text,
+  add column if not exists has_prohibited   text,
+  add column if not exists estimated_value  text,
+  add column if not exists delivery_mode    text,
+  add column if not exists delivery_address text,
+  add column if not exists landmark         text,
+  add column if not exists tracking_number  text unique,
+  add column if not exists status           text not null default 'Pending',
+  add column if not exists invoice_amount   text,
+  add column if not exists invoice_status   text not null default 'Unpaid',
+  add column if not exists invoice_notes    text,
+  add column if not exists current_location text,
+  add column if not exists admin_notes      text;
+
+-- Recreate RLS policies (drop first so re-runs don't fail)
+drop policy if exists "allow_insert" on public.bookings;
 create policy "allow_insert"
   on public.bookings for insert
   to anon with check (true);
 
--- Allow anonymous selects (admin page has its own password gate)
+drop policy if exists "allow_select" on public.bookings;
 create policy "allow_select"
   on public.bookings for select
   to anon using (true);
 
--- Allow anonymous deletes (guarded by password in the admin UI)
+drop policy if exists "allow_delete" on public.bookings;
 create policy "allow_delete"
   on public.bookings for delete
   to anon using (true);
 
--- Add support for detailed Calgary -> Lagos shipping form fields
-alter table public.bookings
-  add column if not exists sender_address text,
-  add column if not exists receiver_name text,
-  add column if not exists receiver_address text,
-  add column if not exists receiver_email text,
-  add column if not exists receiver_phone text,
-  add column if not exists electronics text,
-  add column if not exists has_prohibited text,
-  add column if not exists estimated_value text,
-  add column if not exists delivery_mode text,
-  add column if not exists delivery_address text,
-  add column if not exists landmark text,
-  add column if not exists tracking_number text unique,
-  add column if not exists status text not null default 'Pending',
-  add column if not exists invoice_amount text,
-  add column if not exists invoice_status text not null default 'Unpaid',
-  add column if not exists invoice_notes text,
-  add column if not exists current_location text,
-  add column if not exists admin_notes text;
-
--- Allow anonymous updates (admin page has its own password gate)
+drop policy if exists "allow_update" on public.bookings;
 create policy "allow_update"
   on public.bookings for update
   to anon using (true) with check (true);
-
-
