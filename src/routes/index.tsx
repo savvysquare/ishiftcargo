@@ -131,7 +131,7 @@ function Index() {
               {trustItems.map((t) => (
                 <div key={t} className="flex items-center gap-2">
                   <CheckCircle2 className="h-4 w-4 shrink-0 text-[var(--teal)]" />
-                  <span className="font-medium text-[var(--navy)] leading-tight whitespace-nowrap">{t}</span>
+                  <span className={`font-medium text-[var(--navy)] leading-tight ${t === trustItems[trustItems.length - 1] ? "" : "whitespace-nowrap"}`}>{t}</span>
                 </div>
               ))}
             </div>
