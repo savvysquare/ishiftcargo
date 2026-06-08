@@ -20,6 +20,19 @@ export interface Booking {
   location: string;
   preferred_date: string;
   estimate: string;
+  
+  // Calgary -> Lagos detailed fields
+  sender_address?: string;
+  receiver_name?: string;
+  receiver_address?: string;
+  receiver_email?: string;
+  receiver_phone?: string;
+  electronics?: string;
+  has_prohibited?: string;
+  estimated_value?: string;
+  delivery_mode?: string;
+  delivery_address?: string;
+  landmark?: string;
 }
 
 export type BookingInput = Omit<Booking, "id" | "submitted_at">;

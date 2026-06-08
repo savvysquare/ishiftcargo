@@ -276,20 +276,52 @@ function BookingsPage() {
                     </button>
                   </div>
                   <div className="space-y-4">
-                    <DetailRow icon={<User />} label="Name" value={selected.name} />
-                    <DetailRow icon={<Mail />} label="Email" value={selected.email} />
-                    <DetailRow icon={<Phone />} label="Phone" value={selected.phone} />
+                    <div className="rounded-xl bg-[var(--surface-2)] p-3 border border-border">
+                      <p className="text-[10px] font-bold uppercase tracking-wider text-[var(--teal)]">Sender (Calgary/Canada)</p>
+                      <DetailRow icon={<User />} label="Name" value={selected.name} />
+                      <DetailRow icon={<Mail />} label="Email" value={selected.email} />
+                      <DetailRow icon={<Phone />} label="Phone" value={selected.phone} />
+                      {selected.sender_address && <DetailRow icon={<MapPin />} label="Address" value={selected.sender_address} />}
+                    </div>
+
+                    {selected.receiver_name && (
+                      <div className="rounded-xl bg-[var(--surface-2)] p-3 border border-border mt-3">
+                        <p className="text-[10px] font-bold uppercase tracking-wider text-[var(--teal)]">Receiver (Nigeria)</p>
+                        <DetailRow icon={<User />} label="Name" value={selected.receiver_name} />
+                        {selected.receiver_email && <DetailRow icon={<Mail />} label="Email" value={selected.receiver_email} />}
+                        <DetailRow icon={<Phone />} label="Phone" value={selected.receiver_phone || ""} />
+                        <DetailRow icon={<MapPin />} label="Address" value={selected.receiver_address || ""} />
+                      </div>
+                    )}
+
                     <hr className="border-border" />
                     <DetailRow icon={<ArrowLeftRight />} label="Direction" value={friendlyDirection(selected.direction)} />
                     <DetailRow icon={<Package />} label="Service" value={friendlyService(selected.service)} />
                     {selected.weight && <DetailRow icon={<Package />} label="Weight" value={`${selected.weight} kg`} />}
                     {selected.boxes && selected.boxes !== "1" && <DetailRow icon={<Package />} label="Boxes" value={selected.boxes} />}
-                    {selected.type && <DetailRow icon={<FileText />} label="Contents type" value={selected.type} />}
-                    {selected.notes && <DetailRow icon={<FileText />} label="Notes" value={selected.notes} />}
+                    {selected.type && <DetailRow icon={<FileText />} label="Goods Type / Contents" value={selected.type} />}
+                    
+                    {/* Detailed Cargo Info */}
+                    {selected.estimated_value && <DetailRow icon={<DollarSign />} label="Estimated Value" value={`$${selected.estimated_value} CAD`} />}
+                    {selected.electronics && <DetailRow icon={<Package />} label="Electronics" value={selected.electronics} />}
+                    {selected.has_prohibited && <DetailRow icon={<AlertCircle />} label="Contains Prohibited Items?" value={selected.has_prohibited} highlight={selected.has_prohibited === "Yes"} />}
+                    
+                    {selected.notes && <DetailRow icon={<FileText />} label="Detailed Item List / Notes" value={selected.notes} />}
+                    
                     <hr className="border-border" />
-                    {selected.location && <DetailRow icon={<MapPin />} label="Location" value={selected.location} />}
-                    {selected.preferred_date && <DetailRow icon={<Calendar />} label="Preferred date" value={selected.preferred_date} />}
-                    {selected.estimate && <DetailRow icon={<DollarSign />} label="Estimate" value={selected.estimate} highlight />}
+                    {selected.delivery_mode ? (
+                      <div className="rounded-xl border border-border p-3">
+                        <p className="text-[10px] font-bold uppercase tracking-wider text-[var(--teal)]">Delivery Details</p>
+                        <DetailRow icon={<MapPin />} label="Mode" value={selected.delivery_mode} />
+                        {selected.delivery_address && <DetailRow icon={<MapPin />} label="Delivery Address" value={selected.delivery_address} />}
+                        {selected.landmark && <DetailRow icon={<FileText />} label="Landmark" value={selected.landmark} />}
+                      </div>
+                    ) : (
+                      selected.location && <DetailRow icon={<MapPin />} label="Location" value={selected.location} />
+                    )}
+
+                    {selected.preferred_date && <DetailRow icon={<Calendar />} label="Drop-off / Preferred Date" value={selected.preferred_date} />}
+                    {selected.estimate && <DetailRow icon={<DollarSign />} label="Auto Estimate" value={selected.estimate} highlight />}
                     <hr className="border-border" />
                     <p className="text-xs text-muted-foreground">
                       Submitted {new Date(selected.submitted_at).toLocaleString()}

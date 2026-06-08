@@ -35,3 +35,18 @@ create policy "allow_select"
 create policy "allow_delete"
   on public.bookings for delete
   to anon using (true);
+
+-- Add support for detailed Calgary -> Lagos shipping form fields
+alter table public.bookings
+  add column if not exists sender_address text,
+  add column if not exists receiver_name text,
+  add column if not exists receiver_address text,
+  add column if not exists receiver_email text,
+  add column if not exists receiver_phone text,
+  add column if not exists electronics text,
+  add column if not exists has_prohibited text,
+  add column if not exists estimated_value text,
+  add column if not exists delivery_mode text,
+  add column if not exists delivery_address text,
+  add column if not exists landmark text;
+
