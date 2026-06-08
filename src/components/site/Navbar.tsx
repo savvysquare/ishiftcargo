@@ -20,7 +20,7 @@ export function Navbar() {
           <img
             src="/logo.png"
             alt="iShiftCargo logo"
-            className="h-9 w-9 rounded-xl object-cover shadow-soft transition-transform group-hover:scale-105"
+            className="h-9 w-9 object-contain transition-transform group-hover:scale-105"
           />
           <span className="text-lg font-semibold tracking-tight text-[var(--navy)]">
             iShift<span className="text-[var(--teal)]">Cargo</span>

@@ -11,9 +11,9 @@ export const SITE = {
     ],
   },
   calgary: [
-    { area: "Marlborough NE", details: "495 36th Street NE", hours: "Mon–Fri" },
-    { area: "Cranston SE", details: "Drop-off point", hours: "Mon–Sun" },
-    { area: "Seton SE", details: "Frozen drop-off — call ahead", hours: "By appointment" },
-    { area: "Evanston NW", details: "Frozen drop-off — call ahead", hours: "By appointment" },
+    { area: "Marlborough Northeast", details: "495 36th Street Northeast", hours: "Mon–Fri" },
+    { area: "Cranston Southeast", details: "Drop-off point", hours: "Mon–Sun" },
+    { area: "Seton Southeast", details: "Frozen drop-off — call ahead", hours: "By appointment" },
+    { area: "Evanston Northwest", details: "Frozen drop-off — call ahead", hours: "By appointment" },
   ],
 };

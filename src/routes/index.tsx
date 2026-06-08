@@ -24,7 +24,7 @@ const trustItems = [
   "No Hidden Clearance Fees in Nigeria",
   "Free Pickup at Our Lagos Office",
   "7–10 Day Air Transit",
-  "Serving Calgary, AB, BC, SK & MB",
+  "Serving Calgary, Alberta, British Columbia, Saskatchewan & Manitoba",
 ];
 
 const services = [
@@ -67,9 +67,9 @@ const steps = [
 ];
 
 const testimonials = [
-  { quote: "Everything arrived in perfect condition and on time. The pricing was exactly what they quoted — no surprises.", name: "Adaeze O.", role: "Calgary, AB" },
-  { quote: "Shipped my mother's frozen food to Calgary and it arrived beautifully. Their team kept me updated the whole way.", name: "Ifeoma E.", role: "Lagos, NG" },
-  { quote: "Sent a vehicle from Calgary to Lagos. Professional from pickup to port. I'll use them again.", name: "Tunde A.", role: "Calgary, AB" },
+  { quote: "Everything arrived in perfect condition and on time. The pricing was exactly what they quoted — no surprises.", name: "Adaeze O.", role: "Calgary, Alberta" },
+  { quote: "Shipped my mother's frozen food to Calgary and it arrived beautifully. Their team kept me updated the whole way.", name: "Ifeoma E.", role: "Lagos, Nigeria" },
+  { quote: "Sent a vehicle from Calgary to Lagos. Professional from pickup to port. I'll use them again.", name: "Tunde A.", role: "Calgary, Alberta" },
 ];
 
 function Index() {
@@ -215,7 +215,7 @@ function Index() {
                 { icon: Shield, title: "Transparent pricing", text: "No hidden clearance fees in Nigeria. Every cost is explained upfront." },
                 { icon: Clock, title: "Consistent schedules", text: "Weekly and bi-weekly air departures you can plan around." },
                 { icon: Box, title: "Specialized handling", text: "Frozen, electronics, vehicles — each with the right care." },
-                { icon: MapPin, title: "Reach across Western Canada", text: "Calgary, AB, BC, Saskatchewan and Manitoba." },
+                { icon: MapPin, title: "Reach across Canada", text: "Calgary, Alberta, British Columbia, Saskatchewan and Manitoba." },
               ].map((f) => (
                 <div key={f.title} className="rounded-2xl border border-border bg-card p-5 shadow-soft">
                   <div className="grid h-10 w-10 place-items-center rounded-xl bg-[var(--teal-soft)] text-[var(--navy)]">

@@ -7,7 +7,8 @@ export function Footer() {
     <footer className="mt-24 border-t border-border bg-[var(--navy)] text-white/85">
       <div className="container-x grid gap-12 py-16 md:grid-cols-4">
         <div className="md:col-span-1">
-          <div className="text-xl font-semibold tracking-tight text-white">
+          <div className="flex items-center gap-2.5 text-xl font-semibold tracking-tight text-white">
+            <img src="/logo.png" alt="iShiftCargo logo" className="h-9 w-9 object-contain" />
             iShift<span className="text-[var(--teal)]">Cargo</span>
           </div>
           <p className="mt-4 max-w-xs text-sm leading-relaxed text-white/65">

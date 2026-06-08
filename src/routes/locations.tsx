@@ -60,7 +60,7 @@ function LocationsPage() {
               ))}
             </ul>
             <p className="mt-6 rounded-2xl bg-[var(--surface-2)] p-4 text-xs leading-relaxed text-[var(--navy)]">
-              Shipments to other Western Canadian cities (BC, AB, SK, MB) are available with extra delivery or pickup arrangements. Always call ahead.
+              Shipments to other Western Canadian cities (British Columbia, Alberta, Saskatchewan, Manitoba) are available with extra delivery or pickup arrangements. Always call ahead.
             </p>
             <a href={SITE.phoneHref} className="mt-6 inline-flex items-center gap-2 text-sm font-semibold text-[var(--navy)] hover:text-[var(--teal)]">
               <Phone className="h-4 w-4" /> Call ahead: {SITE.phone}
