@@ -262,18 +262,18 @@ function RatesPage() {
   return (
     <>
       <section className="bg-[var(--surface)] relative overflow-hidden">
-        <div className="container-x py-20 md:py-28 relative z-10">
-          <div className="flex items-center gap-2 mb-4">
+        <div className="container-x py-20 md:py-28 relative z-10 text-center md:text-left">
+          <div className="flex justify-center md:justify-start items-center gap-2 mb-4">
             <span className="rounded-full bg-[var(--teal-soft)] px-3 py-1 text-xs font-bold text-[var(--teal)] uppercase tracking-wider">
               iSHIFT & Debillicious Partnership
             </span>
           </div>
           <span className="eyebrow">Rates, Guidelines & Prohibitions</span>
-          <h1 className="mt-5 max-w-3xl text-4xl font-bold tracking-tight text-[var(--navy)] md:text-6xl">
+          <h1 className="mt-5 mx-auto md:mx-0 max-w-3xl text-4xl font-bold tracking-tight text-[var(--navy)] md:text-6xl">
             Transparent pricing. Complete packing rules.
           </h1>
-          <p className="mt-5 max-w-2xl text-lg text-muted-foreground">
-            We publish every rate and guideline clearly. Before shipping, confirm current pricing and browse our searchable catalog of allowed/prohibited items.
+          <p className="mt-5 mx-auto md:mx-0 max-w-2xl text-lg text-muted-foreground">
+            We publish every rate and guideline clearly. Before shipping, confirm current pricing and browse our searchable catalog of allowed and prohibited items.
           </p>
         </div>
         <div className="absolute top-0 right-0 -translate-y-12 translate-x-12 w-96 h-96 bg-[var(--teal-soft)]/20 rounded-full blur-3xl -z-10" />
@@ -281,22 +281,20 @@ function RatesPage() {
 
       {/* PRICE VOLATILITY WARNING */}
       <div className="bg-amber-50 border-y border-amber-200">
-        <div className="container-x py-4 flex flex-col md:flex-row items-start md:items-center gap-3 text-sm text-amber-800">
-          <AlertTriangle className="h-5 w-5 shrink-0 text-amber-600 mt-0.5 md:mt-0" />
+        <div className="container-x py-5 flex flex-col sm:flex-row items-center gap-3 text-sm text-amber-800 text-center sm:text-left">
+          <AlertTriangle className="h-5 w-5 shrink-0 text-amber-600" />
           <p className="leading-relaxed">
-            <strong>⚠️ INFORMATION YOU SHOULD KNOW:</strong> The rates and guidelines below are valid only for <strong>TODAY</strong> and are subject to change <strong>WITHOUT NOTICE</strong> due to exchange rate volatility and rapid shipping regulation changes. Please verify requirements before dispatching.
+            <strong>⚠️ IMPORTANT:</strong> Rates and guidelines are valid only for <strong>TODAY</strong> and subject to change <strong>WITHOUT NOTICE</strong> due to exchange rate volatility. Please verify current pricing before dispatching.
           </p>
         </div>
       </div>
 
       <section className="section-y">
         <div className="container-x">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-12">
-            <div>
-              <h2 className="text-2xl font-bold text-[var(--navy)]">Select Shipping Direction</h2>
-              <p className="text-sm text-muted-foreground mt-1">Switch tabs to see rates and terms for each route.</p>
-            </div>
-            <div className="inline-flex w-full max-w-md items-center rounded-full border border-border bg-background p-1 shadow-soft">
+          <div className="mb-12 text-center">
+            <h2 className="text-2xl font-bold text-[var(--navy)]">Select Shipping Direction</h2>
+            <p className="text-sm text-muted-foreground mt-2">Switch tabs to see rates and terms for each route.</p>
+            <div className="mt-6 inline-flex w-full max-w-sm items-center rounded-full border border-border bg-background p-1 shadow-soft">
               {[
                 { key: "ng-ca", label: "Nigeria → Canada" },
                 { key: "ca-ng", label: "Canada → Nigeria" },
@@ -304,7 +302,7 @@ function RatesPage() {
                 <button
                   key={t.key}
                   onClick={() => setTab(t.key as typeof tab)}
-                  className={`flex-1 rounded-full px-5 py-3 text-sm font-semibold transition-all ${
+                  className={`flex-1 rounded-full px-4 py-2.5 text-sm font-semibold transition-all ${
                     tab === t.key ? "bg-[var(--navy)] text-white shadow-soft" : "text-muted-foreground hover:text-[var(--navy)]"
                   }`}
                 >
@@ -427,10 +425,10 @@ function RatesPage() {
             </p>
           </div>
 
-          <div className="max-w-4xl mx-auto rounded-3xl border border-border bg-card p-6 md:p-8 shadow-soft">
-            <div className="grid gap-4 md:grid-cols-4 items-center">
+          <div className="max-w-4xl mx-auto rounded-3xl border border-border bg-card p-5 md:p-8 shadow-soft">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 items-center">
               {/* Search */}
-              <div className="relative md:col-span-2">
+              <div className="relative sm:col-span-2 md:col-span-2">
                 <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <input
                   type="text"
@@ -471,51 +469,53 @@ function RatesPage() {
             </div>
 
             {/* List Results */}
-            <div className="mt-8 overflow-hidden rounded-2xl border border-border bg-background max-h-[400px] overflow-y-auto">
-              <table className="w-full border-collapse text-left text-sm">
-                <thead>
-                  <tr className="bg-[var(--surface-2)] text-[var(--navy)] font-semibold border-b border-border">
-                    <th className="p-4">Item Name</th>
-                    <th className="p-4">Category</th>
-                    <th className="p-4">Status</th>
-                    <th className="p-4">Handling Instructions</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-border">
-                  {filteredItems.length > 0 ? (
-                    filteredItems.map((item, idx) => (
-                      <tr key={idx} className="hover:bg-[var(--surface)]/50 transition-colors">
-                        <td className="p-4 font-medium text-[var(--navy)]">{item.name}</td>
-                        <td className="p-4 text-xs text-muted-foreground">{item.category}</td>
-                        <td className="p-4">
-                          {item.allowed ? (
-                            <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-0.5 text-xs font-semibold text-emerald-700">
-                              <Check className="h-3 w-3" /> Allowed
-                            </span>
-                          ) : (
-                            <span className="inline-flex items-center gap-1 rounded-full bg-red-50 px-2.5 py-0.5 text-xs font-semibold text-red-700">
-                              <X className="h-3 w-3" /> Prohibited
-                            </span>
-                          )}
-                        </td>
-                        <td className="p-4 text-xs text-muted-foreground leading-relaxed">
-                          {item.notes || "Standard packaging guidelines apply."}
+            <div className="mt-8 rounded-2xl border border-border bg-background overflow-hidden">
+              <div className="overflow-x-auto max-h-[440px] overflow-y-auto">
+                <table className="w-full min-w-[620px] border-collapse text-left text-sm">
+                  <thead className="sticky top-0 z-10">
+                    <tr className="bg-[var(--surface-2)] text-[var(--navy)] font-semibold border-b border-border">
+                      <th className="px-4 py-3 whitespace-nowrap">Item Name</th>
+                      <th className="px-4 py-3 whitespace-nowrap">Category</th>
+                      <th className="px-4 py-3 whitespace-nowrap">Status</th>
+                      <th className="px-4 py-3 whitespace-nowrap">Handling Notes</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-border">
+                    {filteredItems.length > 0 ? (
+                      filteredItems.map((item, idx) => (
+                        <tr key={idx} className="hover:bg-[var(--surface)]/50 transition-colors">
+                          <td className="px-4 py-3 font-medium text-[var(--navy)] min-w-[160px]">{item.name}</td>
+                          <td className="px-4 py-3 text-xs text-muted-foreground whitespace-nowrap">{item.category}</td>
+                          <td className="px-4 py-3">
+                            {item.allowed ? (
+                              <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-0.5 text-xs font-semibold text-emerald-700 whitespace-nowrap">
+                                <Check className="h-3 w-3" /> Allowed
+                              </span>
+                            ) : (
+                              <span className="inline-flex items-center gap-1 rounded-full bg-red-50 px-2.5 py-0.5 text-xs font-semibold text-red-700 whitespace-nowrap">
+                                <X className="h-3 w-3" /> Prohibited
+                              </span>
+                            )}
+                          </td>
+                          <td className="px-4 py-3 text-xs text-muted-foreground leading-relaxed min-w-[200px]">
+                            {item.notes || "Standard packaging guidelines apply."}
+                          </td>
+                        </tr>
+                      ))
+                    ) : (
+                      <tr>
+                        <td colSpan={4} className="p-8 text-center text-muted-foreground">
+                          No items found matching your filters.
                         </td>
                       </tr>
-                    ))
-                  ) : (
-                    <tr>
-                      <td colSpan={4} className="p-8 text-center text-muted-foreground">
-                        No items found matching your filters.
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
+                    )}
+                  </tbody>
+                </table>
+              </div>
             </div>
-            <div className="mt-4 text-xs text-muted-foreground flex items-center gap-1.5">
-              <Info className="h-3.5 w-3.5 text-[var(--teal)] shrink-0" />
-              <span>Blended Ogbono, Crayfish, and Dried Fish are **only** permitted on air cargo. Sea cargo strictly prohibits these items.</span>
+            <div className="mt-4 text-xs text-muted-foreground flex items-start gap-1.5">
+              <Info className="h-3.5 w-3.5 text-[var(--teal)] shrink-0 mt-0.5" />
+              <span>Blended Ogbono, Crayfish, and Dried Fish are permitted on <strong>air cargo only</strong>. Sea cargo strictly prohibits these items.</span>
             </div>
           </div>
         </div>

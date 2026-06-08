@@ -24,7 +24,7 @@ const trustItems = [
   "No Hidden Clearance Fees in Nigeria",
   "Free Pickup at Our Lagos Office",
   "7–10 Day Air Transit",
-  "Serving Calgary, Alberta, British Columbia, Saskatchewan & Manitoba",
+  "Serving Alberta, British Columbia, Saskatchewan & Manitoba",
 ];
 
 const services = [
@@ -125,13 +125,12 @@ function Index() {
           </div>
         </div>
 
-        {/* Trust bar */}
         <div className="border-y border-border bg-background/70 backdrop-blur">
-          <div className="container-x grid gap-4 py-5 text-sm text-muted-foreground md:grid-cols-4 md:items-center">
+          <div className="container-x grid grid-cols-2 gap-3 py-5 text-sm text-muted-foreground md:grid-cols-4 md:items-center">
             {trustItems.map((t) => (
               <div key={t} className="flex items-center gap-2">
                 <CheckCircle2 className="h-4 w-4 shrink-0 text-[var(--teal)]" />
-                <span className="font-medium text-[var(--navy)]">{t}</span>
+                <span className="font-medium text-[var(--navy)] leading-tight">{t}</span>
               </div>
             ))}
           </div>
