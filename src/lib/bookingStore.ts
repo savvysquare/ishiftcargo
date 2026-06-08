@@ -33,6 +33,15 @@ export interface Booking {
   delivery_mode?: string;
   delivery_address?: string;
   landmark?: string;
+
+  // Tracking & Lifecycle management fields
+  tracking_number?: string;
+  status?: string;
+  invoice_amount?: string;
+  invoice_status?: string;
+  invoice_notes?: string;
+  current_location?: string;
+  admin_notes?: string;
 }
 
 export type BookingInput = Omit<Booking, "id" | "submitted_at">;
@@ -107,3 +116,68 @@ export async function deleteBooking(id: string): Promise<void> {
   if (isSupabaseConfigured) return deleteBookingRemote(id);
   deleteBookingLocal(id);
 }
+
+/* ─── Extra Operations for Admin Management & Tracking ───────────────── */
+
+const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+async function updateBookingRemote(id: string, updates: Partial<Booking>): Promise<Booking> {
+  const { data, error } = await supabase!
+    .from("bookings")
+    .update(updates)
+    .eq("id", id)
+    .select()
+    .single();
+  if (error) throw new Error(error.message);
+  return data as Booking;
+}
+
+function updateBookingLocal(id: string, updates: Partial<Booking>): Booking {
+  const bookings = getBookingsLocal();
+  const idx = bookings.findIndex((b) => b.id === id);
+  if (idx === -1) throw new Error("Booking not found");
+  const updated = { ...bookings[idx], ...updates };
+  bookings[idx] = updated;
+  localStorage.setItem(LS_KEY, JSON.stringify(bookings));
+  return updated;
+}
+
+async function getBookingByTrackingNumberRemote(trackingNum: string): Promise<Booking | null> {
+  const cleanNum = trackingNum.trim();
+  if (uuidRegex.test(cleanNum)) {
+    const { data } = await supabase!
+      .from("bookings")
+      .select("*")
+      .eq("id", cleanNum)
+      .maybeSingle();
+    if (data) return data as Booking;
+  }
+  const { data, error } = await supabase!
+    .from("bookings")
+    .select("*")
+    .eq("tracking_number", cleanNum.toUpperCase())
+    .maybeSingle();
+  if (error) throw new Error(error.message);
+  return data as Booking | null;
+}
+
+function getBookingByTrackingNumberLocal(trackingNum: string): Booking | null {
+  const cleanNum = trackingNum.trim().toUpperCase();
+  const bookings = getBookingsLocal();
+  return (
+    bookings.find(
+      (b) => b.tracking_number?.toUpperCase() === cleanNum || b.id.toUpperCase() === cleanNum
+    ) || null
+  );
+}
+
+export async function updateBooking(id: string, updates: Partial<Booking>): Promise<Booking> {
+  if (isSupabaseConfigured) return updateBookingRemote(id, updates);
+  return updateBookingLocal(id, updates);
+}
+
+export async function getBookingByTrackingNumber(trackingNum: string): Promise<Booking | null> {
+  if (isSupabaseConfigured) return getBookingByTrackingNumberRemote(trackingNum);
+  return getBookingByTrackingNumberLocal(trackingNum);
+}
+

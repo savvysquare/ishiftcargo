@@ -29,6 +29,7 @@ export function Footer() {
               ["/locations", "Locations"],
               ["/faq", "FAQ"],
               ["/book", "Book a Shipment"],
+              ["/track", "Track Shipment"],
             ].map(([to, label]) => (
               <li key={to}>
                 <Link to={to} className="text-white/70 transition-colors hover:text-white">

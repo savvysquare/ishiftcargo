@@ -72,13 +72,22 @@ function estimate(direction: Direction, service: ServiceKey, weightStr: string, 
   return null;
 }
 
+function generateTrackingNumber() {
+  const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+  let result = "";
+  for (let i = 0; i < 6; i++) {
+    result += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return `ISC-${result}`;
+}
+
 function BookPage() {
   const [step, setStep] = useState(1);
   const [direction, setDirection] = useState<Direction>("ca-ng");
   const [service, setService] = useState<ServiceKey>("air-dry");
   const [weight, setWeight] = useState("");
   const [boxes, setBoxes] = useState("1");
-  const [type, setType] = useState("Dry goods");
+  const [type, setType] = useState(""); // Default empty, vehicle details uses this
   const [notes, setNotes] = useState("");
   const [location, setLocation] = useState("Marlborough NE — Calgary");
   const [date, setDate] = useState("");
@@ -87,8 +96,9 @@ function BookPage() {
   const [phone, setPhone] = useState("");
   const [done, setDone] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [generatedTrackNum, setGeneratedTrackNum] = useState("");
 
-  // Detailed Calgary -> Lagos Form Fields State
+  // Detailed Form Fields State
   const [senderAddress, setSenderAddress] = useState("");
   const [receiverName, setReceiverName] = useState("");
   const [receiverAddress, setReceiverAddress] = useState("");
@@ -107,8 +117,8 @@ function BookPage() {
   const services = SERVICE_OPTIONS[direction];
   const est = useMemo(() => estimate(direction, service, weight, boxes), [direction, service, weight, boxes]);
 
-  const isDetailedFlow = direction === "ca-ng" && (service === "air-dry" || service === "sea-box");
-  const maxSteps = isDetailedFlow ? 5 : 4;
+  const isDetailedFlow = true;
+  const maxSteps = 5;
 
   useEffect(() => {
     if (step > maxSteps) {
@@ -128,66 +138,69 @@ function BookPage() {
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (isDetailedFlow) {
-      if (!name || !email || !phone || !senderAddress || !date) {
-        toast.error("Please fill in all sender details.");
-        return;
-      }
-      if (!receiverName || !receiverPhone || !receiverAddress) {
-        toast.error("Please fill in receiver contact details.");
-        return;
-      }
-      if (!notes) {
-        toast.error("Please provide a detailed list of shipping items.");
-        return;
-      }
-      if (!estimatedValue) {
-        toast.error("Please state the estimated value of the items.");
-        return;
-      }
-      if (hasProhibited === "Yes") {
-        toast.error("We cannot accept packages containing prohibited items. Please remove them before booking.");
-        return;
-      }
-      if (!agreedToDeclaration || !agreedToTerms) {
-        toast.error("You must agree to all declarations, terms & conditions to submit.");
-        return;
-      }
-    } else {
-      if (!name || !email || !phone) {
-        toast.error("Please fill in your contact details.");
-        return;
-      }
+    if (!name || !email || !phone || !senderAddress || !date) {
+      toast.error("Please fill in all sender details.");
+      return;
+    }
+    if (!receiverName || !receiverPhone || !receiverAddress) {
+      toast.error("Please fill in receiver contact details.");
+      return;
+    }
+    if (!notes) {
+      toast.error("Please provide a detailed list of shipping items.");
+      return;
+    }
+    if (!estimatedValue) {
+      toast.error("Please state the estimated value of the items.");
+      return;
+    }
+    if (hasProhibited === "Yes") {
+      toast.error("We cannot accept packages containing prohibited items. Please remove them before booking.");
+      return;
+    }
+    if (!agreedToDeclaration || !agreedToTerms) {
+      toast.error("You must agree to all declarations, terms & conditions to submit.");
+      return;
     }
 
     setSubmitting(true);
     try {
+      const trackingNumber = generateTrackingNumber();
+      setGeneratedTrackNum(trackingNumber);
+
       await saveBooking({
         name,
         email,
         phone,
         direction,
         service,
-        weight: service === "sea-box" ? "" : weight,
+        weight: service === "sea-box" || service === "vehicle" ? "" : weight,
         boxes: service === "sea-box" ? boxes : "",
-        type: isDetailedFlow ? goodsType : type,
-        notes: isDetailedFlow ? `Items list: ${notes}` : notes,
-        location: isDetailedFlow ? `${deliveryMode} - Lagos` : location,
+        type: service === "vehicle" ? type : goodsType,
+        notes: `Items list: ${notes}`,
+        location: `${deliveryMode} - ${direction === "ca-ng" ? "Lagos" : "Calgary"}`,
         preferred_date: date,
         estimate: est?.value ?? "",
 
         // Calgary -> Lagos detailed inputs
-        sender_address: isDetailedFlow ? senderAddress : undefined,
-        receiver_name: isDetailedFlow ? receiverName : undefined,
-        receiver_address: isDetailedFlow ? receiverAddress : undefined,
-        receiver_email: isDetailedFlow ? receiverEmail : undefined,
-        receiver_phone: isDetailedFlow ? receiverPhone : undefined,
-        electronics: isDetailedFlow && service === "air-dry" ? selectedElectronics.join(", ") : undefined,
-        has_prohibited: isDetailedFlow ? hasProhibited : undefined,
-        estimated_value: isDetailedFlow ? estimatedValue : undefined,
-        delivery_mode: isDetailedFlow ? deliveryMode : undefined,
-        delivery_address: isDetailedFlow && deliveryMode !== "Warehouse Pickup" ? deliveryAddress : undefined,
-        landmark: isDetailedFlow && deliveryMode !== "Warehouse Pickup" ? landmark : undefined,
+        sender_address: senderAddress,
+        receiver_name: receiverName,
+        receiver_address: receiverAddress,
+        receiver_email: receiverEmail,
+        receiver_phone: receiverPhone,
+        electronics: service.startsWith("air-") ? selectedElectronics.join(", ") : undefined,
+        has_prohibited: hasProhibited,
+        estimated_value: estimatedValue,
+        delivery_mode: deliveryMode,
+        delivery_address: deliveryMode !== "Warehouse Pickup" ? deliveryAddress : undefined,
+        landmark: deliveryMode !== "Warehouse Pickup" ? landmark : undefined,
+
+        // Tracking & Status management
+        tracking_number: trackingNumber,
+        status: "Pending",
+        invoice_amount: est?.value ?? "",
+        invoice_status: "Unpaid",
+        current_location: direction === "ca-ng" ? "Calgary Warehouse" : "Lagos Office",
       });
 
       setDone(true);
@@ -201,6 +214,7 @@ function BookPage() {
     }
   };
 
+
   if (done) {
     return (
       <section className="section-y">
@@ -210,18 +224,42 @@ function BookPage() {
           </div>
           <h1 className="mt-6 text-3xl font-bold text-[var(--navy)] md:text-4xl">Booking Completed, {name.split(" ")[0]}!</h1>
           <p className="mt-3 text-lg text-muted-foreground leading-relaxed">
-            Your booking request has been successfully recorded. You will receive a pick-up notification and an invoice containing detailed payment instructions once drop-off is processed.
+            Your booking request has been successfully recorded. You can now track your shipment using the tracking number below.
           </p>
+
+          <div className="mt-6 border border-dashed border-[var(--teal)] bg-[var(--teal-soft)]/20 rounded-2xl p-6 text-center max-w-lg mx-auto">
+            <p className="text-xs uppercase tracking-wider text-muted-foreground font-semibold">Your Tracking Number</p>
+            <p className="mt-2 text-3xl font-mono font-bold tracking-widest text-[var(--navy)] selection:bg-[var(--teal)] selection:text-white">
+              {generatedTrackNum}
+            </p>
+            <button
+              type="button"
+              onClick={() => {
+                navigator.clipboard.writeText(generatedTrackNum);
+                toast.success("Tracking number copied to clipboard!");
+              }}
+              className="mt-3 text-xs text-[var(--teal)] hover:text-[var(--navy)] hover:underline font-semibold"
+            >
+              Copy tracking number
+            </button>
+          </div>
+
+          <div className="mt-4">
+            <a href={`/track?code=${generatedTrackNum}`} className="text-sm font-semibold text-[var(--teal)] hover:text-[var(--navy)] hover:underline">
+              View Tracking Details &rarr;
+            </a>
+          </div>
+
           <div className="mt-6 p-5 rounded-2xl border border-border bg-[var(--surface-2)] text-left text-sm max-w-lg mx-auto">
             <p className="font-semibold text-[var(--navy)] flex items-center gap-1.5"><Info className="h-4 w-4 text-[var(--teal)]" /> What to do next:</p>
             <ul className="mt-2 space-y-1.5 text-xs text-muted-foreground list-disc list-inside">
-              <li>Drop off your package at the designated Calgary drop-off point.</li>
+              <li>Drop off your package at the designated Calgary or Lagos drop-off point.</li>
               <li>Ensure items are heavy-duty packaged and shrink-wrapped.</li>
               <li>Have your declared list ready at drop-off for inspection.</li>
             </ul>
           </div>
           <a href="tel:+14034316456" className="mt-8 inline-flex items-center gap-2 rounded-full bg-[var(--navy)] px-6 py-3 text-sm font-semibold text-white shadow-soft">
-            <Phone className="h-4 w-4" /> Call Calgary: +1 (403) 431-6456
+            <Phone className="h-4 w-4" /> Call Support: +1 (403) 431-6456
           </a>
         </div>
         <Toaster />
@@ -300,259 +338,198 @@ function BookPage() {
               </div>
             )}
 
-            {/* FLOW A: SIMPLE NIGERIA -> CANADA & VEHICLE ROUTE */}
-            {!isDetailedFlow && (
-              <>
-                {step === 2 && (
-                  <div className="space-y-6">
-                    <h2 className="text-xl font-semibold text-[var(--navy)]">Package details</h2>
-                    {service === "sea-box" ? (
-                      <Field label="Number of boxes">
-                        <input type="number" min={1} value={boxes} onChange={(e) => setBoxes(e.target.value)} className={inputCls} />
-                      </Field>
-                    ) : service === "vehicle" ? (
-                      <Field label="Vehicle type">
-                        <input type="text" value={type} onChange={(e) => setType(e.target.value)} placeholder="e.g. Toyota Camry sedan" className={inputCls} />
-                      </Field>
-                    ) : (
-                      <>
-                        <Field label="Estimated weight (kg)">
-                          <input type="number" min={0} step="0.1" value={weight} onChange={(e) => setWeight(e.target.value)} placeholder="e.g. 12" className={inputCls} />
-                        </Field>
-                        <Field label="Contents type">
-                          <select value={type} onChange={(e) => setType(e.target.value)} className={inputCls}>
-                            <option>Dry goods</option><option>Electronics</option><option>Frozen / perishables</option><option>Documents</option><option>Other</option>
-                          </select>
-                        </Field>
-                      </>
-                    )}
-                    <Field label="Notes (optional)">
-                      <textarea rows={4} value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Dimensions, fragile items, special handling..." className={inputCls} />
-                    </Field>
-                  </div>
-                )}
-
-                {step === 3 && (
-                  <div className="space-y-6">
-                    <h2 className="text-xl font-semibold text-[var(--navy)]">Drop-off / Pickup</h2>
-                    <Field label="Preferred location">
-                      <select value={location} onChange={(e) => setLocation(e.target.value)} className={inputCls}>
-                        {direction === "ca-ng" ? (
-                          <>
-                            <option>Marlborough NE — Calgary</option>
-                            <option>Cranston SE — Calgary</option>
-                            <option>Seton SE — Calgary (frozen, call ahead)</option>
-                            <option>Evanston NW — Calgary (frozen, call ahead)</option>
-                            <option>Other Western Canadian city</option>
-                          </>
-                        ) : (
-                          <>
-                            <option>Lagos office (Oregun, Ikeja) — free pickup</option>
-                            <option>Ojota park pickup</option>
-                            <option>Iddo park pickup</option>
-                            <option>Jibowu park pickup</option>
-                            <option>Ikotun park pickup</option>
-                            <option>Iyana Ipaja park pickup</option>
-                          </>
-                        )}
-                      </select>
-                    </Field>
-                    <Field label="Preferred date">
-                      <input type="date" value={date} onChange={(e) => setDate(e.target.value)} className={inputCls} />
-                    </Field>
-                  </div>
-                )}
-
-                {step === 4 && (
-                  <div className="space-y-6">
-                    <h2 className="text-xl font-semibold text-[var(--navy)]">Your contact details</h2>
-                    <Field label="Full name"><input required value={name} onChange={(e) => setName(e.target.value)} className={inputCls} /></Field>
-                    <Field label="Email"><input required type="email" value={email} onChange={(e) => setEmail(e.target.value)} className={inputCls} /></Field>
-                    <Field label="Phone"><input required type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} className={inputCls} /></Field>
-                  </div>
-                )}
-              </>
+            {/* STEP 2: SENDER DETAILS */}
+            {step === 2 && (
+              <div className="space-y-6">
+                <h2 className="text-xl font-semibold text-[var(--navy)]">
+                  Sender Information ({direction === "ca-ng" ? "Calgary / Canada" : "Lagos / Nigeria"})
+                </h2>
+                <div className="grid gap-4 md:grid-cols-2">
+                  <Field label="Sender's Full Name *">
+                    <input required value={name} onChange={(e) => setName(e.target.value)} className={inputCls} placeholder="John Doe" />
+                  </Field>
+                  <Field label="Sender's Email Address *">
+                    <input required type="email" value={email} onChange={(e) => setEmail(e.target.value)} className={inputCls} placeholder="john@example.com" />
+                  </Field>
+                </div>
+                <div className="grid gap-4 md:grid-cols-2">
+                  <Field label="Sender's Phone Number *">
+                    <input required type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} className={inputCls} placeholder="e.g. +1 (403) 555-0199" />
+                  </Field>
+                  <Field label="Date of Package Drop-off *">
+                    <input required type="date" value={date} onChange={(e) => setDate(e.target.value)} className={inputCls} />
+                  </Field>
+                </div>
+                <Field label="Sender's Residential/Office Address *">
+                  <input required value={senderAddress} onChange={(e) => setSenderAddress(e.target.value)} className={inputCls} placeholder={`Full address in ${direction === "ca-ng" ? "Calgary / Canada" : "Lagos / Nigeria"}`} />
+                </Field>
+              </div>
             )}
 
-            {/* FLOW B: DETAILED CALGARY -> LAGOS FORMS */}
-            {isDetailedFlow && (
-              <>
-                {/* STEP 2: SENDER DETAILS */}
-                {step === 2 && (
-                  <div className="space-y-6">
-                    <h2 className="text-xl font-semibold text-[var(--navy)]">Sender Information (Calgary / Canada)</h2>
-                    <div className="grid gap-4 md:grid-cols-2">
-                      <Field label="Sender's Full Name *">
-                        <input required value={name} onChange={(e) => setName(e.target.value)} className={inputCls} placeholder="John Doe" />
-                      </Field>
-                      <Field label="Sender's Email Address *">
-                        <input required type="email" value={email} onChange={(e) => setEmail(e.target.value)} className={inputCls} placeholder="john@example.com" />
-                      </Field>
-                    </div>
-                    <div className="grid gap-4 md:grid-cols-2">
-                      <Field label="Sender's Phone Number *">
-                        <input required type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} className={inputCls} placeholder="e.g. +1 (403) 555-0199" />
-                      </Field>
-                      <Field label="Date of Package Drop-off *">
-                        <input required type="date" value={date} onChange={(e) => setDate(e.target.value)} className={inputCls} />
-                      </Field>
-                    </div>
-                    <Field label="Sender's Residential/Office Address *">
-                      <input required value={senderAddress} onChange={(e) => setSenderAddress(e.target.value)} className={inputCls} placeholder="Full address in Calgary / Canada" />
+            {/* STEP 3: RECEIVER DETAILS */}
+            {step === 3 && (
+              <div className="space-y-6">
+                <h2 className="text-xl font-semibold text-[var(--navy)]">
+                  Receiver Information ({direction === "ca-ng" ? "Nigeria" : "Calgary / Canada"})
+                </h2>
+                <div className="grid gap-4 md:grid-cols-2">
+                  <Field label="Receiver's Full Name *">
+                    <input required value={receiverName} onChange={(e) => setReceiverName(e.target.value)} className={inputCls} placeholder="Bisi Adebayo" />
+                  </Field>
+                  <Field label="Receiver's Email Address">
+                    <input type="email" value={receiverEmail} onChange={(e) => setReceiverEmail(e.target.value)} className={inputCls} placeholder="bisi@example.com" />
+                  </Field>
+                </div>
+                <div className="grid gap-4 md:grid-cols-2">
+                  <Field label="Receiver's Phone Number *">
+                    <input required type="tel" value={receiverPhone} onChange={(e) => setReceiverPhone(e.target.value)} className={inputCls} placeholder={direction === "ca-ng" ? "e.g. +234 803 555 0199" : "e.g. +1 (403) 555-0199"} />
+                  </Field>
+                  <Field label="Receiver's Full Delivery/Pickup Address *">
+                    <input required value={receiverAddress} onChange={(e) => setReceiverAddress(e.target.value)} className={inputCls} placeholder={`Full address in ${direction === "ca-ng" ? "Nigeria" : "Calgary / Canada"}`} />
+                  </Field>
+                </div>
+              </div>
+            )}
+
+            {/* STEP 4: CARGO DETAILS & ITEMIZATION */}
+            {step === 4 && (
+              <div className="space-y-6">
+                <h2 className="text-xl font-semibold text-[var(--navy)]">Shipment Contents & Details</h2>
+                <div className="grid gap-4 md:grid-cols-2">
+                  <Field label="Type of Goods *">
+                    <select value={goodsType} onChange={(e) => setGoodsType(e.target.value)} className={inputCls}>
+                      <option value="Personal Items">Personal Items</option>
+                      <option value="Commercial Goods">Commercial Goods</option>
+                      <option value="Gifts">Gifts</option>
+                    </select>
+                  </Field>
+                  <Field label="Total Estimated Value of Items (CAD) *">
+                    <input required type="number" min={0} value={estimatedValue} onChange={(e) => setEstimatedValue(e.target.value)} className={inputCls} placeholder="For customs and optional insurance" />
+                  </Field>
+                </div>
+
+                <div className="grid gap-4 md:grid-cols-2">
+                  {service === "sea-box" ? (
+                    <Field label="Total Number of Boxes *">
+                      <input required type="number" min={1} value={boxes} onChange={(e) => setBoxes(e.target.value)} className={inputCls} />
                     </Field>
-                  </div>
-                )}
-
-                {/* STEP 3: RECEIVER DETAILS */}
-                {step === 3 && (
-                  <div className="space-y-6">
-                    <h2 className="text-xl font-semibold text-[var(--navy)]">Receiver Information (Nigeria)</h2>
-                    <div className="grid gap-4 md:grid-cols-2">
-                      <Field label="Receiver's Full Name *">
-                        <input required value={receiverName} onChange={(e) => setReceiverName(e.target.value)} className={inputCls} placeholder="Bisi Adebayo" />
-                      </Field>
-                      <Field label="Receiver's Email Address">
-                        <input type="email" value={receiverEmail} onChange={(e) => setReceiverEmail(e.target.value)} className={inputCls} placeholder="bisi@example.com" />
-                      </Field>
-                    </div>
-                    <div className="grid gap-4 md:grid-cols-2">
-                      <Field label="Receiver's Phone Number *">
-                        <input required type="tel" value={receiverPhone} onChange={(e) => setReceiverPhone(e.target.value)} className={inputCls} placeholder="e.g. +234 803 555 0199" />
-                      </Field>
-                      <Field label="Receiver's Full Delivery/Pickup Address *">
-                        <input required value={receiverAddress} onChange={(e) => setReceiverAddress(e.target.value)} className={inputCls} placeholder="Full address in Nigeria" />
-                      </Field>
-                    </div>
-                  </div>
-                )}
-
-                {/* STEP 4: CARGO DETAILS & ITEMIZATION */}
-                {step === 4 && (
-                  <div className="space-y-6">
-                    <h2 className="text-xl font-semibold text-[var(--navy)]">Shipment Contents & Details</h2>
-                    <div className="grid gap-4 md:grid-cols-2">
-                      <Field label="Type of Goods *">
-                        <select value={goodsType} onChange={(e) => setGoodsType(e.target.value)} className={inputCls}>
-                          <option value="Personal Items">Personal Items</option>
-                          <option value="Commercial Goods">Commercial Goods</option>
-                          <option value="Gifts">Gifts</option>
-                        </select>
-                      </Field>
-                      <Field label="Total Estimated Value of Items (CAD) *">
-                        <input required type="number" min={0} value={estimatedValue} onChange={(e) => setEstimatedValue(e.target.value)} className={inputCls} placeholder="For customs and optional insurance" />
-                      </Field>
-                    </div>
-
-                    <div className="grid gap-4 md:grid-cols-2">
-                      {service === "air-dry" ? (
-                        <Field label="Total Estimated Weight (kg) *">
-                          <input required type="number" min={0.1} step="0.1" value={weight} onChange={(e) => setWeight(e.target.value)} className={inputCls} placeholder="e.g. 10.5" />
-                        </Field>
-                      ) : (
-                        <Field label="Total Number of Boxes/Bags *">
-                          <input required type="number" min={1} value={boxes} onChange={(e) => setBoxes(e.target.value)} className={inputCls} />
-                        </Field>
-                      )}
-
-                      <Field label="Contains Prohibited Items? (Perfumes/Aerosols/Drugs) *">
-                        <select value={hasProhibited} onChange={(e) => setHasProhibited(e.target.value as any)} className={`${inputCls} ${hasProhibited === "Yes" ? "border-red-500 bg-red-50 text-red-700" : ""}`}>
-                          <option value="No">No, does not contain prohibited items</option>
-                          <option value="Yes">Yes, contains prohibited items</option>
-                        </select>
-                      </Field>
-                    </div>
-
-                    {service === "air-dry" && (
-                      <div>
-                        <span className="mb-2 block text-xs font-semibold uppercase tracking-wider text-muted-foreground">Are you shipping any electronics?</span>
-                        <div className="grid grid-cols-2 gap-2 mt-2">
-                          {["Phone", "Laptops", "Games (Xbox, Playstation, etc)", "N/A"].map((el) => (
-                            <label key={el} className="flex items-center gap-2 rounded-xl border border-border p-3 cursor-pointer hover:bg-secondary">
-                              <input
-                                type="checkbox"
-                                checked={selectedElectronics.includes(el)}
-                                onChange={() => handleCheckboxChange(el)}
-                                className="accent-[var(--teal)]"
-                              />
-                              <span className="text-xs text-[var(--navy)]">{el}</span>
-                            </label>
-                          ))}
-                        </div>
-                        <p className="text-[10px] text-muted-foreground mt-2">
-                          ⚠️ Required: Laptops, phones, vitamins, prescriptions, and car parts must be declared at drop-off. Please provide receipts for new electronics.
-                        </p>
-                      </div>
-                    )}
-
-                    <Field label="Detailed list of items (List ALL items in package) *">
-                      <textarea required rows={4} value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="e.g. 3 native attires, 2 shoes, 5 bags of milk powder, 4 soaps..." className={inputCls} />
+                  ) : service === "vehicle" ? (
+                    <Field label="Vehicle Make, Model & Year *">
+                      <input required type="text" value={type} onChange={(e) => setType(e.target.value)} className={inputCls} placeholder="e.g. 2018 Toyota Camry Sedan" />
                     </Field>
+                  ) : (
+                    <Field label="Total Estimated Weight (kg) *">
+                      <input required type="number" min={0.1} step="0.1" value={weight} onChange={(e) => setWeight(e.target.value)} className={inputCls} placeholder="e.g. 10.5" />
+                    </Field>
+                  )}
+
+                  <Field label="Contains Prohibited Items? (Perfumes/Aerosols/Drugs) *">
+                    <select value={hasProhibited} onChange={(e) => setHasProhibited(e.target.value as any)} className={`${inputCls} ${hasProhibited === "Yes" ? "border-red-500 bg-red-50 text-red-700" : ""}`}>
+                      <option value="No">No, does not contain prohibited items</option>
+                      <option value="Yes">Yes, contains prohibited items</option>
+                    </select>
+                  </Field>
+                </div>
+
+                {service.startsWith("air-") && (
+                  <div>
+                    <span className="mb-2 block text-xs font-semibold uppercase tracking-wider text-muted-foreground font-sans">Are you shipping any electronics?</span>
+                    <div className="grid grid-cols-2 gap-2 mt-2">
+                      {["Phone", "Laptops", "Games (Xbox, Playstation, etc)", "N/A"].map((el) => (
+                        <label key={el} className="flex items-center gap-2 rounded-xl border border-border p-3 cursor-pointer hover:bg-secondary">
+                          <input
+                            type="checkbox"
+                            checked={selectedElectronics.includes(el)}
+                            onChange={() => handleCheckboxChange(el)}
+                            className="accent-[var(--teal)]"
+                          />
+                          <span className="text-xs text-[var(--navy)]">{el}</span>
+                        </label>
+                      ))}
+                    </div>
+                    <p className="text-[10px] text-muted-foreground mt-2">
+                      ⚠️ Required: Laptops, phones, vitamins, prescriptions, and car parts must be declared at drop-off. Please provide receipts for new electronics.
+                    </p>
                   </div>
                 )}
 
-                {/* STEP 5: DELIVERY DETAILS & AGREEMENTS */}
-                {step === 5 && (
-                  <div className="space-y-6">
-                    <h2 className="text-xl font-semibold text-[var(--navy)]">Delivery & Legal Declarations</h2>
-                    
-                    <Field label="Mode of Delivery (Lagos/Nigeria) *">
-                      <select value={deliveryMode} onChange={(e) => setDeliveryMode(e.target.value)} className={inputCls}>
+                <Field label="Detailed list of items (List ALL items in package) *">
+                  <textarea required rows={4} value={notes} onChange={(e) => setNotes(e.target.value)} placeholder={service === "vehicle" ? "List any items loaded inside the vehicle, or write 'None'..." : "e.g. 3 native attires, 2 shoes, 5 bags of milk powder, 4 soaps..."} className={inputCls} />
+                </Field>
+              </div>
+            )}
+
+            {/* STEP 5: DELIVERY DETAILS & AGREEMENTS */}
+            {step === 5 && (
+              <div className="space-y-6">
+                <h2 className="text-xl font-semibold text-[var(--navy)]">Delivery & Legal Declarations</h2>
+                
+                <Field label={`Mode of Delivery (${direction === "ca-ng" ? "Lagos/Nigeria" : "Calgary/Canada"}) *`}>
+                  <select value={deliveryMode} onChange={(e) => setDeliveryMode(e.target.value)} className={inputCls}>
+                    {direction === "ca-ng" ? (
+                      <>
                         <option value="Warehouse Pickup">Self-Pickup at Lagos Warehouse (Oregun, Ikeja) — FREE</option>
                         <option value="Within Lagos/Ogun Delivery">Door-to-door: Within Lagos / Ogun (Min $30 for Air, $50 for Sea)</option>
                         <option value="Outside Lagos/Ogun Delivery">Door-to-door: Outside Lagos / Ogun (Min $50 for Air, $70 for Sea)</option>
-                      </select>
-                    </Field>
-
-                    {deliveryMode !== "Warehouse Pickup" && (
-                      <div className="grid gap-4 md:grid-cols-2">
-                        <Field label="Delivery Street Address *">
-                          <input required value={deliveryAddress} onChange={(e) => setDeliveryAddress(e.target.value)} className={inputCls} placeholder="Street address in Nigeria" />
-                        </Field>
-                        <Field label="Nearest Landmark / Instructions">
-                          <input value={landmark} onChange={(e) => setLandmark(e.target.value)} className={inputCls} placeholder="e.g., Opp. Polaris Bank" />
-                        </Field>
-                      </div>
+                      </>
+                    ) : (
+                      <>
+                        <option value="Warehouse Pickup">Self-Pickup at Calgary Warehouse (Marlborough NE) — FREE</option>
+                        <option value="Within Calgary Delivery">Door-to-door: Within Calgary (Min $30 CAD)</option>
+                        <option value="Outside Calgary Delivery">Door-to-door: Outside Calgary / Western Canada (Min $50 CAD)</option>
+                      </>
                     )}
+                  </select>
+                </Field>
 
-                    {/* SENDER LEGAL DECLARATION */}
-                    <div className="rounded-2xl border border-border bg-[var(--surface-2)] p-5">
-                      <label className="flex items-start gap-3 cursor-pointer">
-                        <input
-                          type="checkbox"
-                          required
-                          checked={agreedToDeclaration}
-                          onChange={(e) => setAgreedToDeclaration(e.target.checked)}
-                          className="mt-1 accent-[var(--teal)] shrink-0"
-                        />
-                        <span className="text-xs leading-relaxed text-[var(--navy)]">
-                          I, the shipper, hereby confirm that the packages or shipments I am providing to <strong>iSHIFT SERVICES INC</strong> or its agent(s) do not contain any contraband, dangerous goods, or narcotics. I understand that any false declaration may result in legal consequences, and I accept full responsibility for the contents of my shipment.
-                        </span>
-                      </label>
-                    </div>
-
-                    {/* TERMS AND CONDITIONS SCROLL BOX */}
-                    <div>
-                      <span className="mb-2 block text-xs font-semibold uppercase tracking-wider text-muted-foreground">Terms & Conditions Agreement</span>
-                      <div className="h-32 overflow-y-auto border border-border rounded-xl p-4 text-[10px] leading-relaxed text-muted-foreground space-y-3 bg-background">
-                        <p><strong>Limitation of Liability:</strong> iSHIFT SERVICES INC maximum liability for any loss or damage to shipments, if no value is declared, is limited to $2 (Or Naira equivalent) per kilogram of the shipment's weight. This applies whether loss or damage is partial or total. For high-value items, you may declare the value of your shipment and choose to purchase additional insurance. If no additional insurance is purchased, the maximum liability of $2 per kg applies regardless of actual value.</p>
-                        <p><strong>Customs Inspection:</strong> All shipments are subject to inspection by the Nigerian Customs Service. This may include opening, searching, or seizure. iSHIFT Services Inc. is not liable for actions taken by customs authorities.</p>
-                        <p><strong>Timelines:</strong> We are not liable for delays caused by airlines, shipping lines, customs, or other regulatory authorities. The stated delivery timeline (7-10 business days for air, 2-3 months for sea) is based on standard operational flows and not guaranteed.</p>
-                        <p><strong>Optional Delivery:</strong> Courier and delivery services are optional convenience services used at the customer's own risk. iSHIFT disclaims liability for transit issues once handed over to third parties.</p>
-                      </div>
-                      <label className="flex items-center gap-3 mt-3 cursor-pointer">
-                        <input
-                          type="checkbox"
-                          required
-                          checked={agreedToTerms}
-                          onChange={(e) => setAgreedToTerms(e.target.checked)}
-                          className="accent-[var(--teal)] shrink-0"
-                        />
-                        <span className="text-xs font-semibold text-[var(--navy)]">Agree to Terms & Conditions and Privacy Policy *</span>
-                      </label>
-                    </div>
+                {deliveryMode !== "Warehouse Pickup" && (
+                  <div className="grid gap-4 md:grid-cols-2">
+                    <Field label="Delivery Street Address *">
+                      <input required value={deliveryAddress} onChange={(e) => setDeliveryAddress(e.target.value)} className={inputCls} placeholder={`Street address in ${direction === "ca-ng" ? "Nigeria" : "Canada"}`} />
+                    </Field>
+                    <Field label="Nearest Landmark / Instructions">
+                      <input value={landmark} onChange={(e) => setLandmark(e.target.value)} className={inputCls} placeholder="e.g., Opp. Polaris Bank" />
+                    </Field>
                   </div>
                 )}
-              </>
+
+                {/* SENDER LEGAL DECLARATION */}
+                <div className="rounded-2xl border border-border bg-[var(--surface-2)] p-5">
+                  <label className="flex items-start gap-3 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      required
+                      checked={agreedToDeclaration}
+                      onChange={(e) => setAgreedToDeclaration(e.target.checked)}
+                      className="mt-1 accent-[var(--teal)] shrink-0"
+                    />
+                    <span className="text-xs leading-relaxed text-[var(--navy)]">
+                      I, the shipper, hereby confirm that the packages or shipments I am providing to <strong>iSHIFT SERVICES INC</strong> or its agent(s) do not contain any contraband, dangerous goods, or narcotics. I understand that any false declaration may result in legal consequences, and I accept full responsibility for the contents of my shipment.
+                    </span>
+                  </label>
+                </div>
+
+                {/* TERMS AND CONDITIONS SCROLL BOX */}
+                <div>
+                  <span className="mb-2 block text-xs font-semibold uppercase tracking-wider text-muted-foreground">Terms & Conditions Agreement</span>
+                  <div className="h-32 overflow-y-auto border border-border rounded-xl p-4 text-[10px] leading-relaxed text-muted-foreground space-y-3 bg-background">
+                    <p><strong>Limitation of Liability:</strong> iSHIFT SERVICES INC maximum liability for any loss or damage to shipments, if no value is declared, is limited to $2 (Or Naira equivalent) per kilogram of the shipment's weight. This applies whether loss or damage is partial or total. For high-value items, you may declare the value of your shipment and choose to purchase additional insurance. If no additional insurance is purchased, the maximum liability of $2 per kg applies regardless of actual value.</p>
+                    <p><strong>Customs Inspection:</strong> All shipments are subject to inspection by the Nigerian Customs Service. This may include opening, searching, or seizure. iSHIFT Services Inc. is not liable for actions taken by customs authorities.</p>
+                    <p><strong>Timelines:</strong> We are not liable for delays caused by airlines, shipping lines, customs, or other regulatory authorities. The stated delivery timeline (7-10 business days for air, 2-3 months for sea) is based on standard operational flows and not guaranteed.</p>
+                    <p><strong>Optional Delivery:</strong> Courier and delivery services are optional convenience services used at the customer's own risk. iSHIFT disclaims liability for transit issues once handed over to third parties.</p>
+                  </div>
+                  <label className="flex items-center gap-3 mt-3 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      required
+                      checked={agreedToTerms}
+                      onChange={(e) => setAgreedToTerms(e.target.checked)}
+                      className="accent-[var(--teal)] shrink-0"
+                    />
+                    <span className="text-xs font-semibold text-[var(--navy)]">Agree to Terms & Conditions and Privacy Policy *</span>
+                  </label>
+                </div>
+              </div>
             )}
 
             <div className="mt-10 flex items-center justify-between">
@@ -619,7 +596,7 @@ function BookPage() {
                 <Phone className="h-4 w-4" /> +1 (403) 431-6456
               </a>
               <p className="mt-4 text-xs leading-relaxed text-muted-foreground">
-                Lagos Support: Dunsin +234 906 032 5802 · Debbie +234 806 350 6603
+                Lagos Support: +1 (403) 431-6456
               </p>
             </div>
           </aside>

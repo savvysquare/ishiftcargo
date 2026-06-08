@@ -19,8 +19,10 @@ import {
   Loader2,
   AlertCircle,
 } from "lucide-react";
-import { getBookings, deleteBooking, type Booking } from "@/lib/bookingStore";
-import { isSupabaseConfigured as checkSupabase } from "@/lib/supabase";
+import { getBookings, deleteBooking, updateBooking, type Booking } from "@/lib/bookingStore";
+
+import { toast } from "sonner";
+import { Toaster } from "@/components/ui/sonner";
 
 export const Route = createFileRoute("/bookings")({
   component: BookingsPage,
@@ -42,6 +44,50 @@ function BookingsPage() {
   const [selected, setSelected] = useState<Booking | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
+
+  const [editStatus, setEditStatus] = useState("Pending");
+  const [editLocation, setEditLocation] = useState("");
+  const [editInvoiceAmount, setEditInvoiceAmount] = useState("");
+  const [editInvoiceStatus, setEditInvoiceStatus] = useState("Unpaid");
+  const [editInvoiceNotes, setEditInvoiceNotes] = useState("");
+  const [editAdminNotes, setEditAdminNotes] = useState("");
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    if (selected) {
+      setEditStatus(selected.status || "Pending");
+      setEditLocation(selected.current_location || "");
+      setEditInvoiceAmount(selected.invoice_amount || selected.estimate || "");
+      setEditInvoiceStatus(selected.invoice_status || "Unpaid");
+      setEditInvoiceNotes(selected.invoice_notes || "");
+      setEditAdminNotes(selected.admin_notes || "");
+    }
+  }, [selected]);
+
+  const handleSave = async () => {
+    if (!selected) return;
+    setSaving(true);
+    try {
+      const updated = await updateBooking(selected.id, {
+        status: editStatus,
+        current_location: editLocation,
+        invoice_amount: editInvoiceAmount,
+        invoice_status: editInvoiceStatus,
+        invoice_notes: editInvoiceNotes,
+        admin_notes: editAdminNotes,
+      });
+      // Update local state list
+      setBookings((prev) =>
+        prev.map((b) => (b.id === selected.id ? { ...b, ...updated } : b))
+      );
+      setSelected({ ...selected, ...updated });
+      toast.success("Shipment details updated successfully!");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Failed to update shipment");
+    } finally {
+      setSaving(false);
+    }
+  };
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -155,19 +201,11 @@ function BookingsPage() {
       <header className="sticky top-0 z-30 border-b border-border bg-card/80 backdrop-blur">
         <div className="container-x flex h-16 items-center justify-between">
           <div className="flex items-center gap-3">
-            <span className="text-base font-bold text-[var(--navy)]">Bookings Dashboard</span>
+            <span className="text-base font-bold text-[var(--navy)]">Bookings</span>
             <span className="rounded-full bg-[var(--teal-soft)] px-2.5 py-0.5 text-xs font-semibold text-[var(--teal)]">
               {bookings.length} total
             </span>
-            {checkSupabase ? (
-              <span className="rounded-full bg-emerald-50 px-2.5 py-0.5 text-xs font-semibold text-emerald-600">
-                ● Supabase
-              </span>
-            ) : (
-              <span className="rounded-full bg-amber-50 px-2.5 py-0.5 text-xs font-semibold text-amber-600">
-                ● Local storage
-              </span>
-            )}
+
           </div>
           <div className="flex items-center gap-3">
             <button
@@ -239,6 +277,11 @@ function BookingsPage() {
                     <div className="min-w-0 flex-1">
                       <div className="flex flex-wrap items-center gap-2">
                         <span className="text-sm font-semibold text-[var(--navy)]">{b.name}</span>
+                        {b.tracking_number && (
+                          <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-mono font-bold text-[var(--navy)] border border-slate-200">
+                            {b.tracking_number}
+                          </span>
+                        )}
                         <Badge label={friendlyDirection(b.direction)} />
                         <Badge label={friendlyService(b.service)} teal />
                       </div>
@@ -276,6 +319,13 @@ function BookingsPage() {
                     </button>
                   </div>
                   <div className="space-y-4">
+                    <div className="rounded-xl bg-[var(--surface-2)] p-3 border border-border">
+                      <p className="text-[10px] font-bold uppercase tracking-wider text-[var(--teal)]">Shipment Tracking Info</p>
+                      <DetailRow icon={<Package />} label="Tracking Number" value={selected.tracking_number || "None"} highlight />
+                      <DetailRow icon={<Package />} label="Current Status" value={selected.status || "Pending"} />
+                      {selected.current_location && <DetailRow icon={<MapPin />} label="Current Location" value={selected.current_location} />}
+                    </div>
+
                     <div className="rounded-xl bg-[var(--surface-2)] p-3 border border-border">
                       <p className="text-[10px] font-bold uppercase tracking-wider text-[var(--teal)]">Sender (Calgary/Canada)</p>
                       <DetailRow icon={<User />} label="Name" value={selected.name} />
@@ -323,6 +373,118 @@ function BookingsPage() {
                     {selected.preferred_date && <DetailRow icon={<Calendar />} label="Drop-off / Preferred Date" value={selected.preferred_date} />}
                     {selected.estimate && <DetailRow icon={<DollarSign />} label="Auto Estimate" value={selected.estimate} highlight />}
                     <hr className="border-border" />
+
+                    <div className="rounded-xl border border-border p-4 bg-[var(--surface-2)]/50 space-y-4">
+                      <p className="text-xs font-bold uppercase tracking-wider text-[var(--navy)] flex items-center gap-1.5">
+                        <Package className="h-4 w-4 text-[var(--teal)]" /> Manage Shipment
+                      </p>
+
+                      <div className="grid gap-3">
+                        {/* Status Selection */}
+                        <div>
+                          <label className="block text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1">
+                            Shipment Status
+                          </label>
+                          <select
+                            value={editStatus}
+                            onChange={(e) => setEditStatus(e.target.value)}
+                            className="w-full rounded-lg border border-border bg-background px-3 py-2 text-xs outline-none focus:border-[var(--teal)]"
+                          >
+                            <option value="Pending">Pending Drop-off</option>
+                            <option value="Received">Received at Warehouse</option>
+                            <option value="In Transit">In Transit</option>
+                            <option value="Customs Clearance">Customs Clearance</option>
+                            <option value="Arrived">Arrived at Destination</option>
+                            <option value="Delivered">Delivered</option>
+                            <option value="Cancelled">Cancelled</option>
+                          </select>
+                        </div>
+
+                        {/* Current Location */}
+                        <div>
+                          <label className="block text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1">
+                            Current Location
+                          </label>
+                          <input
+                            type="text"
+                            value={editLocation}
+                            onChange={(e) => setEditLocation(e.target.value)}
+                            className="w-full rounded-lg border border-border bg-background px-3 py-2 text-xs outline-none focus:border-[var(--teal)]"
+                            placeholder="e.g. Calgary Warehouse, Lagos Office"
+                          />
+                        </div>
+
+                        {/* Invoice Status */}
+                        <div className="grid grid-cols-2 gap-2">
+                          <div>
+                            <label className="block text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1">
+                              Invoice Status
+                            </label>
+                            <select
+                              value={editInvoiceStatus}
+                              onChange={(e) => setEditInvoiceStatus(e.target.value)}
+                              className="w-full rounded-lg border border-border bg-background px-3 py-2 text-xs outline-none focus:border-[var(--teal)]"
+                            >
+                              <option value="Unpaid">Unpaid</option>
+                              <option value="Paid">Paid</option>
+                              <option value="N/A">N/A</option>
+                            </select>
+                          </div>
+
+                          <div>
+                            <label className="block text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1">
+                              Invoice Amount
+                            </label>
+                            <input
+                              type="text"
+                              value={editInvoiceAmount}
+                              onChange={(e) => setEditInvoiceAmount(e.target.value)}
+                              className="w-full rounded-lg border border-border bg-background px-3 py-2 text-xs outline-none focus:border-[var(--teal)]"
+                              placeholder="e.g. $120.00 CAD"
+                            />
+                          </div>
+                        </div>
+
+                        {/* Invoice Payment Instructions / Notes */}
+                        <div>
+                          <label className="block text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1">
+                            Invoice Payment Notes / Link
+                          </label>
+                          <textarea
+                            rows={2}
+                            value={editInvoiceNotes}
+                            onChange={(e) => setEditInvoiceNotes(e.target.value)}
+                            className="w-full rounded-lg border border-border bg-background px-3 py-2 text-xs outline-none focus:border-[var(--teal)] resize-none"
+                            placeholder="e.g. Bank details, payment link..."
+                          />
+                        </div>
+
+                        {/* Internal Admin Notes */}
+                        <div>
+                          <label className="block text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1">
+                            Internal Admin Notes (Private)
+                          </label>
+                          <textarea
+                            rows={2}
+                            value={editAdminNotes}
+                            onChange={(e) => setEditAdminNotes(e.target.value)}
+                            className="w-full rounded-lg border border-border bg-background px-3 py-2 text-xs outline-none focus:border-[var(--teal)] resize-none"
+                            placeholder="e.g. Customer called, package is fragile..."
+                          />
+                        </div>
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={handleSave}
+                        disabled={saving}
+                        className="w-full rounded-full bg-[var(--navy)] py-2 text-xs font-semibold text-white shadow-soft hover:bg-[var(--navy-soft)] disabled:opacity-50"
+                      >
+                        {saving ? "Saving Changes..." : "Save Changes"}
+                      </button>
+                    </div>
+
+                    <hr className="border-border" />
                     <p className="text-xs text-muted-foreground">
                       Submitted {new Date(selected.submitted_at).toLocaleString()}
                     </p>
@@ -348,7 +510,7 @@ function BookingsPage() {
             </div>
             <h3 className="mt-4 text-base font-bold text-[var(--navy)]">Delete booking?</h3>
             <p className="mt-2 text-sm text-muted-foreground">
-              This action cannot be undone. The booking will be permanently removed{checkSupabase ? " from Supabase" : " from local storage"}.
+              This action cannot be undone. The booking will be permanently removed.
             </p>
             <div className="mt-6 flex gap-3">
               <button
@@ -369,6 +531,7 @@ function BookingsPage() {
           </div>
         </div>
       )}
+      <Toaster />
     </div>
   );
 }

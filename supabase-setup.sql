@@ -48,5 +48,18 @@ alter table public.bookings
   add column if not exists estimated_value text,
   add column if not exists delivery_mode text,
   add column if not exists delivery_address text,
-  add column if not exists landmark text;
+  add column if not exists landmark text,
+  add column if not exists tracking_number text unique,
+  add column if not exists status text not null default 'Pending',
+  add column if not exists invoice_amount text,
+  add column if not exists invoice_status text not null default 'Unpaid',
+  add column if not exists invoice_notes text,
+  add column if not exists current_location text,
+  add column if not exists admin_notes text;
+
+-- Allow anonymous updates (admin page has its own password gate)
+create policy "allow_update"
+  on public.bookings for update
+  to anon using (true) with check (true);
+
 

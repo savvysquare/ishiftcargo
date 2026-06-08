@@ -9,6 +9,7 @@ const links = [
   { to: "/rates", label: "Rates & Schedules" },
   { to: "/locations", label: "Locations" },
   { to: "/faq", label: "FAQ" },
+  { to: "/track", label: "Track Shipment" },
 ];
 
 export function Navbar() {
