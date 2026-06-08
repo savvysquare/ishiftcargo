@@ -9,9 +9,9 @@ export const Route = createFileRoute("/services")({
   head: () => ({
     meta: [
       { title: "Services | iShiftCargo — Air, Sea & Vehicle Shipping" },
-      { name: "description", content: "Air, frozen air, sea and vehicle cargo shipping between Lagos and Western Canada. Specialized handling, transparent pricing." },
+      { name: "description", content: "Air, frozen air, sea and vehicle cargo shipping between Nigeria and Canada. Specialized handling, transparent pricing." },
       { property: "og:title", content: "Services | iShiftCargo" },
-      { property: "og:description", content: "Air, frozen, sea and vehicle cargo shipping between Lagos and Western Canada." },
+      { property: "og:description", content: "Air, frozen, sea and vehicle cargo shipping between Nigeria and Canada." },
       { property: "og:url", content: "/services" },
     ],
     links: [{ rel: "canonical", href: "/services" }],
@@ -52,7 +52,7 @@ function ServicesPage() {
             Premium shipping options for every need.
           </h1>
           <p className="mt-5 max-w-2xl text-lg text-muted-foreground">
-            Four professionally managed services covering air, frozen, sea and vehicle freight between Lagos and Western Canada.
+            Four professionally managed services covering air, frozen, sea and vehicle freight between Nigeria and Canada.
           </p>
         </div>
       </section>

@@ -9,7 +9,7 @@ export const Route = createFileRoute("/book")({
   head: () => ({
     meta: [
       { title: "Book a Shipment | iShiftCargo" },
-      { name: "description", content: "Get an instant estimate and book your air, sea or vehicle shipment between Lagos and Western Canada." },
+      { name: "description", content: "Get an instant estimate and book your air, sea or vehicle shipment between Nigeria and Canada." },
       { property: "og:title", content: "Book a Shipment | iShiftCargo" },
       { property: "og:description", content: "Book your shipment with iShiftCargo in minutes." },
       { property: "og:url", content: "/book" },
@@ -179,8 +179,8 @@ function BookPage() {
                   <p className="mt-1 text-sm text-muted-foreground">Where is your shipment going?</p>
                   <div className="mt-4 grid gap-3 md:grid-cols-2">
                     {[
-                      { key: "ca-ng", label: "Canada → Nigeria", helper: "From Calgary / Western Canada to Lagos" },
-                      { key: "ng-ca", label: "Nigeria → Canada", helper: "From Lagos to Calgary / Western Canada" },
+                      { key: "ca-ng", label: "Canada → Nigeria", helper: "From Canada to Nigeria" },
+                      { key: "ng-ca", label: "Nigeria → Canada", helper: "From Nigeria to Canada" },
                     ].map((d) => (
                       <button
                         key={d.key}

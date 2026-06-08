@@ -9,10 +9,10 @@ import vehicleImg from "@/assets/vehicle-cargo.jpg";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "iShiftCargo | Premium Cargo Shipping | Lagos ↔ Western Canada" },
-      { name: "description", content: "Reliable air, sea and vehicle shipping between Lagos and Calgary. Transparent pricing, no hidden clearance fees in Nigeria, convenient drop-off & pickup." },
-      { property: "og:title", content: "iShiftCargo | Premium Cargo Shipping | Lagos ↔ Western Canada" },
-      { property: "og:description", content: "Reliable cargo shipping between Lagos and Western Canada. Transparent pricing. Bi-weekly air, sea and vehicle freight." },
+      { title: "iShiftCargo | Premium Cargo Shipping | Nigeria ↔ Canada" },
+      { name: "description", content: "Reliable air, sea and vehicle shipping between Nigeria and Canada. Transparent pricing, no hidden clearance fees, convenient drop-off & pickup." },
+      { property: "og:title", content: "iShiftCargo | Premium Cargo Shipping | Nigeria ↔ Canada" },
+      { property: "og:description", content: "Reliable cargo shipping between Nigeria and Canada. Transparent pricing. Bi-weekly air, sea and vehicle freight." },
       { property: "og:url", content: "/" },
     ],
     links: [{ rel: "canonical", href: "/" }],
@@ -83,12 +83,12 @@ function Index() {
         </div>
         <div className="container-x grid items-center gap-12 py-20 md:py-32 lg:grid-cols-12">
           <div className="lg:col-span-7">
-            <span className="eyebrow"><span className="h-1.5 w-1.5 rounded-full bg-[var(--teal)]" /> Lagos ↔ Western Canada</span>
+            <span className="eyebrow"><span className="h-1.5 w-1.5 rounded-full bg-[var(--teal)]" /> Nigeria ↔ Canada</span>
             <h1 className="mt-6 text-4xl font-bold tracking-tight text-[var(--navy)] md:text-6xl lg:text-7xl">
-              Reliable cargo shipping between Lagos and Western Canada.
+              Reliable cargo shipping between Nigeria and Canada.
             </h1>
             <p className="mt-6 max-w-2xl text-lg leading-relaxed text-muted-foreground md:text-xl">
-              Premium air, sea and vehicle transport with transparent pricing, no hidden clearance fees in Nigeria, and convenient drop-off & pickup in Calgary and Lagos.
+              Premium air, sea and vehicle transport with transparent pricing, no hidden clearance fees, and convenient drop-off & pickup in Canada and Nigeria.
             </p>
             <div className="mt-10 flex flex-wrap items-center gap-3">
               <Link to="/book" className="group inline-flex items-center gap-2 rounded-full bg-[var(--teal)] px-7 py-4 text-base font-semibold text-white shadow-soft transition-all hover:-translate-y-0.5 hover:shadow-lift">
@@ -234,7 +234,7 @@ function Index() {
             <div className="absolute -bottom-6 -left-6 hidden rounded-2xl border border-border bg-background p-5 shadow-lift md:block">
               <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Shipments delivered</p>
               <p className="mt-1 text-3xl font-bold text-[var(--navy)]">10,000+</p>
-              <p className="text-sm text-muted-foreground">between Lagos and Western Canada</p>
+              <p className="text-sm text-muted-foreground">between Nigeria and Canada</p>
             </div>
           </div>
         </div>

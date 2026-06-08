@@ -87,8 +87,42 @@ function LocationsPage() {
               </div>
             </div>
 
+            <div className="mt-6 rounded-2xl border border-border p-5">
+              <p className="text-xs font-semibold uppercase tracking-wider text-[var(--teal)]">Operating Hours</p>
+              <div className="mt-2 text-xs space-y-1 text-muted-foreground">
+                <div className="flex justify-between border-b border-border pb-1">
+                  <span>Monday to Wednesday</span> <span className="font-semibold text-[var(--navy)]">8:00 AM – 5:00 PM</span>
+                </div>
+                <div className="flex justify-between border-b border-border pb-1">
+                  <span>Thursday</span> <span className="font-semibold text-[var(--navy)]">8:00 AM – 4:00 PM</span>
+                </div>
+                <div className="flex justify-between border-b border-border pb-1">
+                  <span>Friday</span> <span className="font-semibold text-[var(--navy)]">8:00 AM – 5:00 PM</span>
+                </div>
+                <div className="flex justify-between border-b border-border pb-1">
+                  <span>Saturday</span> <span className="font-semibold text-[var(--navy)]">8:00 AM – 2:00 PM</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Sunday</span> <span className="font-semibold text-[var(--navy)]">Closed</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-6 rounded-2xl border border-border bg-emerald-50/50 p-5">
+              <p className="text-xs font-semibold uppercase tracking-wider text-emerald-700">Weekly Shipment Schedule</p>
+              <p className="mt-2 text-xs font-medium text-emerald-900 leading-relaxed">
+                ✈️ Shipments leave every <strong>Friday at 10:00 AM</strong>.
+              </p>
+              <p className="mt-1 text-[11px] text-emerald-800 leading-relaxed">
+                To ensure your items are included in the week's shipment, please drop them off before Friday 10:00 AM.
+              </p>
+            </div>
+
             <div className="mt-6 rounded-2xl bg-[var(--surface-2)] p-5">
-              <p className="text-xs font-semibold uppercase tracking-wider text-[var(--teal)]">Park pickups arranged</p>
+              <p className="text-xs font-semibold uppercase tracking-wider text-[var(--teal)]">Park Pickups & Labeling</p>
+              <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
+                We collect packages from major Lagos parks when sent from outside Lagos:
+              </p>
               <ul className="mt-3 flex flex-wrap gap-2">
                 {parks.map((p) => (
                   <li key={p} className="inline-flex items-center gap-1 rounded-full bg-background px-3 py-1.5 text-xs font-medium text-[var(--navy)] shadow-soft">
@@ -96,8 +130,8 @@ function LocationsPage() {
                   </li>
                 ))}
               </ul>
-              <p className="mt-4 text-xs leading-relaxed text-muted-foreground">
-                If using a dispatch, courier or park drop-off, clearly label with your full name, phone number and full Lagos address.
+              <p className="mt-4 text-xs leading-relaxed text-amber-800 bg-amber-50 p-3 rounded-xl border border-amber-200">
+                <strong>⚠️ IMPORTANT:</strong> If you are sending your package by dispatch, courier, or to any of the parks from outside Lagos, please ensure it is clearly labeled with your <strong>full name and contact information</strong>, and addressed to our Lagos location and contact numbers above.
               </p>
             </div>
 

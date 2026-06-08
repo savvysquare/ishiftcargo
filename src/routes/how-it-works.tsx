@@ -7,7 +7,7 @@ export const Route = createFileRoute("/how-it-works")({
       { title: "How it Works | iShiftCargo" },
       { name: "description", content: "A simple 5-step shipping process: quote, drop-off or pickup, professional handling, scheduled departure, and easy collection." },
       { property: "og:title", content: "How it Works | iShiftCargo" },
-      { property: "og:description", content: "A simple 5-step shipping process between Lagos and Western Canada." },
+      { property: "og:description", content: "A simple 5-step shipping process between Nigeria and Canada." },
       { property: "og:url", content: "/how-it-works" },
     ],
     links: [{ rel: "canonical", href: "/how-it-works" }],

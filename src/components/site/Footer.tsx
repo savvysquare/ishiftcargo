@@ -11,7 +11,7 @@ export function Footer() {
             iShift<span className="text-[var(--teal)]">Cargo</span>
           </div>
           <p className="mt-4 max-w-xs text-sm leading-relaxed text-white/65">
-            Premium, transparent cargo shipping between Lagos, Nigeria and Western Canada.
+            Premium, transparent cargo shipping between Nigeria and Canada.
           </p>
           <a href={SITE.instagram} target="_blank" rel="noreferrer" className="mt-6 inline-flex items-center gap-2 text-sm text-white/75 hover:text-[var(--teal)]">
             <Instagram className="h-4 w-4" /> @ishiftservices
@@ -63,7 +63,7 @@ export function Footer() {
 
       <div className="border-t border-white/10">
         <div className="container-x flex flex-col items-center justify-between gap-3 py-6 text-xs text-white/55 md:flex-row">
-          <p>© 2026 iShiftCargo. Professional Cargo Shipping Between Lagos and Western Canada.</p>
+          <p>© 2026 iShiftCargo. Professional Cargo Shipping Between Nigeria and Canada.</p>
           <div className="flex gap-5">
             <a href="#" className="hover:text-white">Terms</a>
             <a href="#" className="hover:text-white">Privacy</a>
