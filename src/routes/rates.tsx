@@ -281,10 +281,10 @@ function RatesPage() {
 
       {/* PRICE VOLATILITY WARNING */}
       <div className="bg-amber-50 border-y border-amber-200">
-        <div className="container-x py-5 flex flex-col sm:flex-row items-center gap-3 text-sm text-amber-800 text-center sm:text-left">
-          <AlertTriangle className="h-5 w-5 shrink-0 text-amber-600" />
-          <p className="leading-relaxed">
-            <strong>⚠️ IMPORTANT:</strong> Rates and guidelines are valid only for <strong>TODAY</strong> and subject to change <strong>WITHOUT NOTICE</strong> due to exchange rate volatility. Please verify current pricing before dispatching.
+        <div className="container-x py-3 flex items-center justify-center gap-2.5 text-sm text-amber-800">
+          <AlertTriangle className="h-4 w-4 shrink-0 text-amber-600" />
+          <p className="font-medium">
+            <strong>⚠️ IMPORTANT:</strong> All prices are valid <strong>TODAY ONLY</strong> and subject to change <strong>WITHOUT NOTICE</strong>. Always confirm current rates before shipping.
           </p>
         </div>
       </div>
