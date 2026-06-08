@@ -126,13 +126,15 @@ function Index() {
         </div>
 
         <div className="border-y border-border bg-background/70 backdrop-blur">
-          <div className="container-x grid grid-cols-2 gap-3 py-5 text-sm text-muted-foreground md:grid-cols-4 md:items-center">
-            {trustItems.map((t) => (
-              <div key={t} className="flex items-center gap-2">
-                <CheckCircle2 className="h-4 w-4 shrink-0 text-[var(--teal)]" />
-                <span className="font-medium text-[var(--navy)] leading-tight">{t}</span>
-              </div>
-            ))}
+          <div className="container-x py-5">
+            <div className="flex flex-wrap items-center justify-evenly gap-y-3 text-sm">
+              {trustItems.map((t) => (
+                <div key={t} className="flex items-center gap-2">
+                  <CheckCircle2 className="h-4 w-4 shrink-0 text-[var(--teal)]" />
+                  <span className="font-medium text-[var(--navy)] leading-tight whitespace-nowrap">{t}</span>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </section>
