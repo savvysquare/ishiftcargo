@@ -127,7 +127,7 @@ function Index() {
 
         <div className="border-y border-border bg-background/70 backdrop-blur">
           <div className="container-x py-5">
-            <div className="flex flex-wrap items-center justify-evenly gap-y-3 text-sm">
+            <div className="flex flex-col items-start gap-3 text-sm sm:flex-row sm:flex-wrap sm:items-center sm:justify-evenly sm:gap-y-3">
               {trustItems.map((t) => (
                 <div key={t} className="flex items-center gap-2">
                   <CheckCircle2 className="h-4 w-4 shrink-0 text-[var(--teal)]" />
