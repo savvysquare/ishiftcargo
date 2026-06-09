@@ -352,12 +352,12 @@ function BookPage() {
                     <input required type="email" value={email} onChange={(e) => setEmail(e.target.value)} className={inputCls} placeholder="john@example.com" />
                   </Field>
                 </div>
-                <div className="grid gap-4 md:grid-cols-2">
+                <div className="grid gap-4 md:grid-cols-2 overflow-hidden">
                   <Field label="Sender's Phone Number *">
                     <input required type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} className={inputCls} placeholder="e.g. +1 (403) 555-0199" />
                   </Field>
                   <Field label="Date of Package Drop-off *">
-                    <input required type="date" value={date} onChange={(e) => setDate(e.target.value)} className={inputCls} />
+                    <input required type="date" value={date} onChange={(e) => setDate(e.target.value)} className={`${inputCls} min-w-0`} />
                   </Field>
                 </div>
                 <Field label="Sender's Residential/Office Address *">
@@ -408,7 +408,7 @@ function BookPage() {
                   </Field>
                 </div>
 
-                <div className="grid gap-4 md:grid-cols-2">
+                <div className="grid gap-4 md:grid-cols-2 items-end">
                   {service === "sea-box" ? (
                     <Field label="Total Number of Boxes *">
                       <input required type="number" min={1} value={boxes} onChange={(e) => setBoxes(e.target.value)} className={inputCls} />
@@ -423,7 +423,7 @@ function BookPage() {
                     </Field>
                   )}
 
-                  <Field label="Contains Prohibited Items? (Perfumes/Aerosols/Drugs) *">
+                  <Field label="Contains Prohibited Items? *">
                     <select value={hasProhibited} onChange={(e) => setHasProhibited(e.target.value as any)} className={`${inputCls} ${hasProhibited === "Yes" ? "border-red-500 bg-red-50 text-red-700" : ""}`}>
                       <option value="No">No, does not contain prohibited items</option>
                       <option value="Yes">Yes, contains prohibited items</option>
