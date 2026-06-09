@@ -7,6 +7,9 @@ import {
 import { toast } from "sonner";
 import { Toaster } from "@/components/ui/sonner";
 import { saveBooking } from "@/lib/bookingStore";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import { format, parse, isValid } from "date-fns";
 
 export const Route = createFileRoute("/book")({
   head: () => ({
@@ -685,31 +688,44 @@ function Field({ label, children, error }: { label: string; children: React.Reac
 // ─── Custom Date Input ────────────────────────────────────────────────────────
 
 function DateInput({ value, onChange, hasError }: { value: string; onChange: (v: string) => void; hasError?: boolean }) {
-  const ref = useRef<HTMLInputElement>(null);
+  const [open, setOpen] = useState(false);
+  const selectedDate = value ? parse(value, "yyyy-MM-dd", new Date()) : undefined;
 
   return (
-    <div className="relative">
-      <input
-        ref={ref}
-        type="date"
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        className={`${ic(!!hasError)} min-w-0 pr-11`}
-        style={{ colorScheme: "light" }}
-      />
-      {/* Custom calendar icon — visible, but native indicator is transparent on top (see styles.css) */}
-      <button
-        type="button"
-        tabIndex={-1}
-        aria-hidden="true"
-        onClick={() => { ref.current?.showPicker?.(); ref.current?.focus(); }}
-        className="absolute inset-y-0 right-0 flex w-11 items-center justify-center text-muted-foreground transition-colors hover:text-[var(--teal)] pointer-events-none"
-      >
-        <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-          <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-        </svg>
-      </button>
-    </div>
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <button
+          type="button"
+          className={`${ic(!!hasError)} relative flex w-full items-center justify-between text-left pr-11 cursor-pointer`}
+        >
+          <span className={!value ? "text-muted-foreground/50" : "text-[var(--navy)]"}>
+            {value && selectedDate && isValid(selectedDate)
+              ? format(selectedDate, "PPP")
+              : "Select date…"}
+          </span>
+          <span className="absolute inset-y-0 right-0 flex w-11 items-center justify-center text-muted-foreground transition-colors hover:text-[var(--teal)]">
+            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+          </span>
+        </button>
+      </PopoverTrigger>
+      <PopoverContent className="w-auto p-0" align="start">
+        <Calendar
+          mode="single"
+          selected={selectedDate}
+          onSelect={(date) => {
+            if (date) {
+              onChange(format(date, "yyyy-MM-dd"));
+            } else {
+              onChange("");
+            }
+            setOpen(false);
+          }}
+          initialFocus
+        />
+      </PopoverContent>
+    </Popover>
   );
 }
 
