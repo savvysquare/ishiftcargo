@@ -9,7 +9,7 @@ export function Footer() {
       <div className="container-x grid gap-12 py-16 md:grid-cols-4">
         <div className="md:col-span-1">
           <div className="flex items-center gap-2.5 text-xl font-semibold tracking-tight text-white">
-            <img src="/logo.png" alt="iShiftCargo logo" className="h-9 w-9 object-contain" />
+            <img src={logoAsset.url} alt="iShiftCargo logo" className="h-10 w-10 rounded-md object-contain bg-white/95 p-0.5" />
             <span>iShift<span className="text-[var(--teal)]">Cargo</span></span>
           </div>
           <p className="mt-4 max-w-xs text-sm leading-relaxed text-white/65">
