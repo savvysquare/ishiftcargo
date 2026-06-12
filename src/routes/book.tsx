@@ -295,7 +295,7 @@ function BookPage() {
                 <li key={n} className="flex flex-1 items-center gap-2">
                   <span className={`grid h-9 w-9 shrink-0 place-items-center rounded-full text-sm font-bold transition-all duration-200 ${
                     step > n ? "bg-[var(--teal)] text-white" :
-                    step === n ? "bg-[var(--navy)] text-white ring-4 ring-[var(--navy)]/15" :
+                    step === n ? "bg-[var(--navy)] text-white ring-4 ring-[var(--navy-alpha-15)]" :
                     "bg-secondary text-muted-foreground"
                   }`}>
                     {step > n ? <Check className="h-4 w-4" /> : n}
@@ -318,7 +318,7 @@ function BookPage() {
                     ].map((d) => (
                       <button key={d.key} type="button"
                         onClick={() => { setDirection(d.key as Direction); setService(SERVICE_OPTIONS[d.key as Direction][0].key); }}
-                        className={`rounded-2xl border p-5 text-left transition-all ${direction === d.key ? "border-[var(--teal)] bg-[var(--teal-soft)]/40 shadow-soft" : "border-border hover:border-[var(--teal)]/40"}`}
+                        className={`rounded-2xl border p-5 text-left transition-all ${direction === d.key ? "border-[var(--teal)] bg-[var(--teal-soft-alpha-40)] shadow-soft" : "border-border hover:border-[var(--teal-alpha-40)]"}`}
                       >
                         <p className="text-sm font-semibold text-[var(--navy)]">{d.label}</p>
                         <p className="mt-1 text-xs text-muted-foreground">{d.helper}</p>
@@ -331,7 +331,7 @@ function BookPage() {
                   <div className="mt-4 grid gap-3 md:grid-cols-2">
                     {services.map((s) => (
                       <button key={s.key} type="button" onClick={() => setService(s.key)}
-                        className={`rounded-2xl border p-5 text-left transition-all ${service === s.key ? "border-[var(--teal)] bg-[var(--teal-soft)]/40 shadow-soft" : "border-border hover:border-[var(--teal)]/40"}`}
+                        className={`rounded-2xl border p-5 text-left transition-all ${service === s.key ? "border-[var(--teal)] bg-[var(--teal-soft-alpha-40)] shadow-soft" : "border-border hover:border-[var(--teal-alpha-40)]"}`}
                       >
                         <p className="text-sm font-semibold text-[var(--navy)]">{s.label}</p>
                         <p className="mt-1 text-xs text-muted-foreground">{s.helper}</p>
@@ -664,7 +664,7 @@ function ic(hasError: boolean) {
     "transition-all duration-150 placeholder:text-muted-foreground/50",
     hasError
       ? "border-red-400 bg-red-50/20 focus:border-red-500 focus:ring-2 focus:ring-red-400/20"
-      : "border-border focus:border-[var(--teal)] focus:ring-2 focus:ring-[var(--teal)]/20",
+      : "border-border focus:border-[var(--teal)] focus:ring-2 focus:ring-[var(--teal-alpha-20)]",
   ].join(" ");
 }
 
@@ -768,12 +768,12 @@ function CustomSelect({
     "w-full flex items-center justify-between gap-2 rounded-xl border bg-background px-4 py-3 text-sm text-left",
     "outline-none transition-all duration-150 cursor-pointer",
     open
-      ? "border-[var(--teal)] ring-2 ring-[var(--teal)]/20"
+      ? "border-[var(--teal)] ring-2 ring-[var(--teal-alpha-20)]"
       : danger
       ? "border-red-400 bg-red-50/20"
       : hasError
       ? "border-red-400 bg-red-50/20"
-      : "border-border hover:border-[var(--teal)]/60",
+      : "border-border hover:border-[var(--teal-alpha-60)]",
   ].join(" ");
 
   return (
@@ -809,7 +809,7 @@ function CustomSelect({
                   className={[
                     "flex cursor-pointer items-center gap-3 px-4 py-2.5 text-sm select-none transition-colors",
                     isSelected
-                      ? "bg-[var(--teal-soft)]/60 text-[var(--teal)] font-semibold"
+                      ? "bg-[var(--teal-soft-alpha-60)] text-[var(--teal)] font-semibold"
                       : "text-[var(--navy)] hover:bg-[var(--surface-2)]",
                   ].join(" ")}
                 >

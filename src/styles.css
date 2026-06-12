@@ -1,6 +1,7 @@
 @import "tailwindcss" source(none);
 @source "../src";
 @import "tw-animate-css";
+@import "react-day-picker/dist/style.css";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -36,6 +37,13 @@
   --color-teal-soft: var(--teal-soft);
   --color-surface: var(--surface);
   --color-surface-2: var(--surface-2);
+  --color-teal-alpha-20: var(--teal-alpha-20);
+  --color-teal-alpha-40: var(--teal-alpha-40);
+  --color-teal-alpha-60: var(--teal-alpha-60);
+  --color-navy-alpha-15: var(--navy-alpha-15);
+  --color-navy-alpha-20: var(--navy-alpha-20);
+  --color-teal-soft-alpha-40: var(--teal-soft-alpha-40);
+  --color-teal-soft-alpha-60: var(--teal-soft-alpha-60);
   --font-display: "Plus Jakarta Sans", "Inter", ui-sans-serif, system-ui, sans-serif;
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
   --shadow-soft: 0 1px 2px rgba(15, 23, 42, 0.04), 0 8px 24px -8px rgba(15, 23, 42, 0.08);
@@ -70,6 +78,13 @@
   --teal-soft: oklch(0.94 0.04 70);            /* warm cream */
   --surface: oklch(0.985 0.008 75);
   --surface-2: oklch(0.965 0.015 70);
+  --teal-alpha-20: oklch(0.62 0.13 50 / 20%);
+  --teal-alpha-40: oklch(0.62 0.13 50 / 40%);
+  --teal-alpha-60: oklch(0.62 0.13 50 / 60%);
+  --navy-alpha-15: oklch(0.32 0.06 55 / 15%);
+  --navy-alpha-20: oklch(0.32 0.06 55 / 20%);
+  --teal-soft-alpha-40: oklch(0.94 0.04 70 / 40%);
+  --teal-soft-alpha-60: oklch(0.94 0.04 70 / 60%);
 }
 
 .dark {
@@ -170,3 +185,147 @@ input[type="date"]::-webkit-datetime-edit-fields-wrapper {
     transform-origin: top;
   }
 }
+
+/* ─── Custom Date Picker / Calendar Styling ──────────────────────────────── */
+.rdp-root {
+  --rdp-cell-size: 38px;
+  --rdp-accent-color: var(--teal);
+  --rdp-accent-color-hover: var(--teal-soft);
+  --rdp-background-color: var(--teal-soft);
+  font-family: var(--font-sans);
+  background-color: var(--background);
+  padding: 0.75rem;
+  border-radius: var(--radius-xl);
+}
+
+.rdp-months {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.rdp-month {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.rdp-month_caption {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 36px;
+  position: relative;
+  font-weight: 700;
+  color: var(--navy);
+  font-size: 0.875rem;
+  text-transform: capitalize;
+}
+
+.rdp-nav {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  pointer-events: none;
+  height: 36px;
+}
+
+.rdp-nav button {
+  pointer-events: auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background-color: var(--background);
+  color: var(--navy-soft);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.rdp-nav button:hover {
+  background-color: var(--surface-2);
+  border-color: var(--teal);
+  color: var(--teal);
+}
+
+.rdp-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.rdp-weekdays {
+  display: flex;
+  width: 100%;
+  margin-bottom: 0.25rem;
+}
+
+.rdp-weekday {
+  flex: 1;
+  text-align: center;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--muted-foreground);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding-block: 0.25rem;
+}
+
+.rdp-weeks {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.rdp-week {
+  display: flex;
+  width: 100%;
+}
+
+.rdp-day {
+  flex: 1;
+  aspect-ratio: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--navy);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  margin: 1px;
+}
+
+.rdp-day:hover {
+  background-color: var(--teal-soft);
+  color: var(--teal);
+}
+
+.rdp-day_selected, 
+.rdp-day[data-selected-single="true"] {
+  background-color: var(--teal) !important;
+  color: white !important;
+  font-weight: 600;
+  border-radius: 8px;
+}
+
+.rdp-day_today {
+  border: 1.5px solid var(--teal);
+  font-weight: 700;
+  color: var(--teal);
+}
+
+.rdp-day_outside {
+  color: var(--muted-foreground);
+  opacity: 0.35;
+}
+
