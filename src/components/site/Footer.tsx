@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { Instagram, MapPin, Phone } from "lucide-react";
 import { SITE } from "@/lib/site";
+import logoAsset from "@/assets/ishift-logo.png.asset.json";
 
 export function Footer() {
   return (
