@@ -2,6 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { Instagram, Menu, Phone, X } from "lucide-react";
 import { useState } from "react";
 import { SITE } from "@/lib/site";
+import logoAsset from "@/assets/ishift-logo.png.asset.json";
 
 const links = [
   { to: "/services", label: "Services" },
