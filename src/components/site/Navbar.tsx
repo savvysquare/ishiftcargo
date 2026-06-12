@@ -2,6 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { Instagram, Menu, Phone, X } from "lucide-react";
 import { useState } from "react";
 import { SITE } from "@/lib/site";
+import logoAsset from "@/assets/ishift-logo.png.asset.json";
 
 const links = [
   { to: "/services", label: "Services" },
@@ -19,9 +20,9 @@ export function Navbar() {
       <div className="container-x flex h-18 items-center justify-between py-4">
         <Link to="/" className="group flex items-center gap-2.5">
           <img
-            src="/logo.png"
+            src={logoAsset.url}
             alt="iShiftCargo logo"
-            className="h-9 w-9 object-contain transition-transform group-hover:scale-105"
+            className="h-10 w-10 rounded-md object-contain transition-transform group-hover:scale-105"
           />
           <span className="text-lg font-semibold tracking-tight text-[var(--navy)]">
             iShift<span className="text-[var(--teal)]">Cargo</span>
