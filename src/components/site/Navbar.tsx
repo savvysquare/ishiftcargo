@@ -18,11 +18,13 @@ export function Navbar() {
     <header className="sticky top-0 z-50 w-full border-b border-border/60 bg-background/85 backdrop-blur-xl">
       <div className="container-x flex h-18 items-center justify-between py-4">
         <Link to="/" className="group flex items-center gap-2.5">
-          <img
-            src="/logo.jpg"
-            alt="iShiftCargo logo"
-            className="h-10 w-auto object-contain transition-transform group-hover:scale-105"
-          />
+          <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-xl border border-border bg-white p-1 transition-all duration-200 group-hover:scale-105 shadow-sm">
+            <img
+              src="/logo.jpg"
+              alt="iShiftCargo logo"
+              className="h-full w-full object-contain"
+            />
+          </div>
           <span className="text-lg font-semibold tracking-tight text-[var(--navy)]">
             iShift<span className="text-[var(--teal)]">Cargo</span>
           </span>
